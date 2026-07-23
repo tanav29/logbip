@@ -1,6 +1,9 @@
 "use client";
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
 
 type Action = (form: FormData) => Promise<void>;
 export function AuthForm({
@@ -21,40 +24,23 @@ export function AuthForm({
   return (
     <form action={formAction} className="space-y-4">
       {isRegister && (
-        <label className="block text-sm font-medium">
+        <Label className="grid gap-2">
           Name
-          <input
-            required
-            name="name"
-            minLength={2}
-            className="mt-1 h-10 w-full rounded-lg border bg-background px-3"
-            placeholder="Ada Lovelace"
-          />
-        </label>
+          <Input required name="name" minLength={2} placeholder="Ada Lovelace" />
+        </Label>
       )}
-      <label className="block text-sm font-medium">
+      <Label className="grid gap-2">
         Email
-        <input
-          required
-          type="email"
-          name="email"
-          className="mt-1 h-10 w-full rounded-lg border bg-background px-3"
-          placeholder="you@example.com"
-        />
-      </label>
-      <label className="block text-sm font-medium">
+        <Input required type="email" name="email" placeholder="you@example.com" />
+      </Label>
+      <Label className="grid gap-2">
         Password
-        <input
-          required
-          type="password"
-          name="password"
-          minLength={8}
-          className="mt-1 h-10 w-full rounded-lg border bg-background px-3"
-          placeholder="8+ characters"
-        />
-      </label>
+        <Input required type="password" name="password" minLength={8} placeholder="8+ characters" />
+      </Label>
       {error && (
-        <p className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>
+        <Card className="border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+          {error}
+        </Card>
       )}
       <Button type="submit" className="h-10 w-full" disabled={pending}>
         {pending ? "Please wait…" : isRegister ? "Create account" : "Sign in"}

@@ -6,6 +6,9 @@ import { db } from "@/db";
 import { entries, paths } from "@/db/schema";
 import { calculateStats } from "@/lib/stats";
 import { SiteHeader } from "@/components/site-header";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default async function Dashboard() {
   const user = await getCurrentUser();
@@ -25,18 +28,14 @@ export default async function Dashboard() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto w-full max-w-6xl px-5 py-10">
+      <div className="bg-gradient-glow" />
+      <main className="mx-auto w-full max-w-6xl px-5 py-10 relative">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-sm text-muted-foreground">Your learning workspace</p>
-            <h1 className="mt-1 text-3xl font-bold">Good to see you, {user.name.split(" ")[0]}.</h1>
+            <p className="text-sm text-muted-foreground uppercase tracking-widest font-semibold">Your learning workspace</p>
+            <h1 className="mt-1 text-4xl font-bold tracking-tight gradient-text bg-[length:200%_auto]">Good to see you, {user.name.split(" ")[0]}.</h1>
           </div>
-          <Link
-            href="/dashboard/paths/new"
-            className="rounded-lg bg-foreground px-4 py-2.5 text-sm font-medium text-background"
-          >
-            New path
-          </Link>
+          <Button render={<Link href="/dashboard/paths/new" />}>New path</Button>
         </div>
         <div className="mb-10 grid gap-4 sm:grid-cols-3">
           <Stat label="Active paths" value={allPaths.length} />
@@ -49,7 +48,7 @@ export default async function Dashboard() {
             value={`${stats.longest} day${stats.longest === 1 ? "" : "s"}`}
           />
         </div>
-        <div className="mb-10 rounded-xl border p-5">
+        <Card className="mb-10 p-5 glass-card border-none">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-semibold">Activity</h2>
             <span className="text-xs text-muted-foreground">Last 10 weeks</span>
@@ -63,7 +62,7 @@ export default async function Dashboard() {
               />
             ))}
           </div>
-        </div>
+        </Card>
         <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
           <section>
             <div className="mb-4 flex items-center justify-between">
@@ -73,24 +72,22 @@ export default async function Dashboard() {
             {allPaths.length ? (
               <div className="grid gap-3">
                 {allPaths.map((path) => (
-                  <Link
-                    key={path.id}
-                    href={`/dashboard/paths/${path.id}`}
-                    className="rounded-xl border p-5 transition hover:-translate-y-0.5 hover:shadow-sm"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <h3 className="font-semibold">{path.title}</h3>
-                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                          {path.description || "No description yet."}
-                        </p>
+                  <Card key={path.id} className="transition-all duration-300 hover:-translate-y-1 glass-card hover:border-primary/50">
+                    <Link href={`/dashboard/paths/${path.id}`} className="block p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="font-semibold">{path.title}</h3>
+                          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                            {path.description || "No description yet."}
+                          </p>
+                        </div>
+                        <Badge variant={path.isPublic ? "success" : "secondary"}>
+                          {path.isPublic ? "Public" : "Private"}
+                        </Badge>
                       </div>
-                      <span className="rounded-full bg-muted px-2.5 py-1 text-xs">
-                        {path.isPublic ? "Public" : "Private"}
-                      </span>
-                    </div>
-                    <p className="mt-4 text-xs text-muted-foreground">/{path.slug}</p>
-                  </Link>
+                      <p className="mt-4 text-xs text-muted-foreground">/{path.slug}</p>
+                    </Link>
+                  </Card>
                 ))}
               </div>
             ) : (
@@ -99,15 +96,15 @@ export default async function Dashboard() {
                 <p className="mt-1 text-sm text-muted-foreground">
                   Create a small, specific learning goal.
                 </p>
-                <Link href="/dashboard/paths/new" className="mt-5 inline-block text-sm underline">
+                <Button variant="link" render={<Link href="/dashboard/paths/new" />}>
                   Create a path
-                </Link>
+                </Button>
               </div>
             )}
           </section>
           <section>
             <h2 className="mb-4 text-lg font-semibold">Recent activity</h2>
-            <div className="rounded-xl border">
+            <Card>
               {recent.length ? (
                 recent.map((entry) => (
                   <div key={entry.id} className="border-b p-4 last:border-0">
@@ -120,7 +117,7 @@ export default async function Dashboard() {
                   Your completed days will appear here.
                 </p>
               )}
-            </div>
+            </Card>
           </section>
         </div>
       </main>
@@ -140,9 +137,11 @@ function heatmap(dates: string[]) {
 }
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-xl border p-5">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="mt-2 text-2xl font-semibold">{value}</p>
-    </div>
+    <Card className="glass-card border-none">
+      <CardContent className="p-5">
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="mt-2 text-3xl font-bold tracking-tight">{value}</p>
+      </CardContent>
+    </Card>
   );
 }

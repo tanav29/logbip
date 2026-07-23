@@ -14,7 +14,11 @@ import {
 } from "@/../server/services";
 
 export async function register(form: FormData) {
-  await registerUser(formValue(form, "name"), formValue(form, "email"), formValue(form, "password"));
+  await registerUser(
+    formValue(form, "name"),
+    formValue(form, "email"),
+    formValue(form, "password"),
+  );
   redirect("/dashboard");
 }
 
@@ -62,8 +66,10 @@ export async function updateProfile(form: FormData) {
   const user = await getCurrentUser();
   if (!user) throw new Error("Unauthorized");
   await updateProfileForUser(user.id, {
-    name: formValue(form, "name"), email: formValue(form, "email"),
-    xAccount: formValue(form, "xAccount"), avatar: formValue(form, "avatar"),
+    name: formValue(form, "name"),
+    email: formValue(form, "email"),
+    xAccount: formValue(form, "xAccount"),
+    avatar: formValue(form, "avatar"),
   });
   revalidatePath("/settings");
   revalidatePath("/dashboard");

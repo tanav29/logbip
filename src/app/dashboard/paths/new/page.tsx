@@ -1,14 +1,25 @@
 import Link from "next/link";
 import { savePath } from "@/app/actions";
 import { SiteHeader } from "@/components/site-header";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
 export default function NewPath() {
   return (
     <>
       <SiteHeader />
       <main className="mx-auto w-full max-w-2xl px-5 py-10">
-        <Link href="/dashboard" className="text-sm text-muted-foreground">
+        <Button
+          variant="link"
+          className="h-auto px-0 text-muted-foreground"
+          render={<Link href="/dashboard" />}
+        >
           ← Dashboard
-        </Link>
+        </Button>
         <h1 className="mt-6 text-3xl font-bold">Create a learning path</h1>
         <p className="mt-2 text-muted-foreground">
           Give your practice a home and make progress visible.
@@ -18,6 +29,7 @@ export default function NewPath() {
     </>
   );
 }
+
 export function PathForm({
   initial,
 }: {
@@ -30,58 +42,51 @@ export function PathForm({
   };
 }) {
   return (
-    <form action={savePath} className="mt-8 space-y-5">
-      <input type="hidden" name="id" value={initial?.id ?? ""} />
-      <label className="block text-sm font-medium">
-        Title
-        <input
-          required
-          name="title"
-          defaultValue={initial?.title}
-          className="mt-1 h-11 w-full rounded-lg border bg-background px-3"
-          placeholder="e.g. Learn TypeScript"
-        />
-      </label>
-      <label className="block text-sm font-medium">
-        Description<span className="ml-1 font-normal text-muted-foreground">(optional)</span>
-        <textarea
-          name="description"
-          defaultValue={initial?.description ?? ""}
-          rows={4}
-          className="mt-1 w-full rounded-lg border bg-background px-3 py-2"
-          placeholder="What are you working toward?"
-        />
-      </label>
-      <label className="block text-sm font-medium">
-        Public URL
-        <input
-          required
-          name="slug"
-          defaultValue={initial?.slug}
-          className="mt-1 h-11 w-full rounded-lg border bg-background px-3"
-          placeholder="learn-typescript"
-        />
-        <span className="mt-1 block text-xs text-muted-foreground">
-          Letters, numbers, and hyphens. This is the link you share.
-        </span>
-      </label>
-      <label className="flex items-start gap-3 rounded-lg border p-4 text-sm">
-        <input
-          type="checkbox"
-          name="isPublic"
-          defaultChecked={initial?.isPublic ?? true}
-          className="mt-0.5 size-4"
-        />
-        <span>
-          <span className="font-medium">Make this path public</span>
-          <span className="mt-1 block text-muted-foreground">
-            Anyone with the link can see its entries.
+    <Card className="mt-8 p-6">
+      <form action={savePath} className="space-y-5">
+        <input type="hidden" name="id" value={initial?.id ?? ""} />
+        <Label className="grid gap-2">
+          Title
+          <Input
+            required
+            name="title"
+            defaultValue={initial?.title}
+            placeholder="e.g. Learn TypeScript"
+          />
+        </Label>
+        <Label className="grid gap-2">
+          Description <span className="font-normal text-muted-foreground">(optional)</span>
+          <Textarea
+            name="description"
+            defaultValue={initial?.description ?? ""}
+            rows={4}
+            placeholder="What are you working toward?"
+          />
+        </Label>
+        {initial ? (
+          <Label className="grid gap-2">
+            Public URL
+            <Input required name="slug" defaultValue={initial.slug} />
+            <span className="text-xs font-normal text-muted-foreground">
+              This link identifies your path and can be edited later.
+            </span>
+          </Label>
+        ) : (
+          <p className="rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
+            A unique share link will be generated automatically when you create this path.
+          </p>
+        )}
+        <label className="flex items-start gap-3 rounded-lg border p-4 text-sm">
+          <Checkbox name="isPublic" defaultChecked={initial?.isPublic ?? true} />
+          <span>
+            <span className="font-medium">Make this path public</span>
+            <span className="mt-1 block text-muted-foreground">
+              Anyone with the link can see its entries.
+            </span>
           </span>
-        </span>
-      </label>
-      <button className="rounded-lg bg-foreground px-5 py-2.5 text-sm font-medium text-background">
-        {initial ? "Save changes" : "Create path"}
-      </button>
-    </form>
+        </label>
+        <Button type="submit">{initial ? "Save changes" : "Create path"}</Button>
+      </form>
+    </Card>
   );
 }

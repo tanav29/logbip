@@ -27,7 +27,11 @@ app.get("/me", async (c) => c.json({ user: await getCurrentUser() }));
 app.post("/auth/register", async (c) => {
   try {
     const body = await c.req.json<{ name?: string; email?: string; password?: string }>();
-    const user = await registerUser(body.name?.trim() ?? "", body.email?.trim() ?? "", body.password ?? "");
+    const user = await registerUser(
+      body.name?.trim() ?? "",
+      body.email?.trim() ?? "",
+      body.password ?? "",
+    );
     return c.json({ user }, 201);
   } catch (error) {
     return c.json({ error: error instanceof Error ? error.message : "Unable to register." }, 400);
@@ -66,7 +70,13 @@ app.get("/paths/:id", async (c) => {
 
 app.post("/paths", async (c) => {
   try {
-    const body = await c.req.json<{ id?: string; title?: string; description?: string; slug?: string; isPublic?: boolean }>();
+    const body = await c.req.json<{
+      id?: string;
+      title?: string;
+      description?: string;
+      slug?: string;
+      isPublic?: boolean;
+    }>();
     const id = await savePathForUser(c.get("user").id, {
       id: body.id,
       title: body.title ?? "",

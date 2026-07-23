@@ -1,4 +1,5 @@
-import { and, asc, desc, eq, ne } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, ne } from "drizzle-orm";
+import { nanoid } from "nanoid";
 import { db } from "@/db";
 import { entries, paths, users } from "@/db/schema";
 import {
@@ -21,7 +22,7 @@ export async function registerUser(name: string, email: string, password: string
     .where(eq(users.email, email.toLowerCase()))
     .limit(1);
   if (existing.length) throw new Error("An account with that email already exists.");
-  const id = crypto.randomUUID();
+  const id = nanoid();
   await db.insert(users).values({
     id,
     name,
@@ -48,11 +49,20 @@ export async function updateProfileForUser(
   const email = input.email.trim().toLowerCase();
   const xAccount = input.xAccount?.trim().replace(/^@/, "") ?? "";
   const avatar = input.avatar?.trim() ?? "";
-  if (name.length < 2 || !/^\S+@\S+\.\S+$/.test(email)) throw new Error("Enter a name and valid email address.");
-  if (avatar && !/^https?:\/\/\S+$/i.test(avatar)) throw new Error("Avatar must be a valid http(s) image URL.");
-  const existing = await db.select({ id: users.id }).from(users).where(and(eq(users.email, email), ne(users.id, userId))).limit(1);
+  if (name.length < 2 || !/^\S+@\S+\.\S+$/.test(email))
+    throw new Error("Enter a name and valid email address.");
+  if (avatar && !/^https?:\/\/\S+$/i.test(avatar))
+    throw new Error("Avatar must be a valid http(s) image URL.");
+  const existing = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(and(eq(users.email, email), ne(users.id, userId)))
+    .limit(1);
   if (existing.length) throw new Error("That email address is already in use.");
-  await db.update(users).set({ name, email, xAccount: xAccount || null, avatar: avatar || null, updatedAt: new Date() }).where(eq(users.id, userId));
+  await db
+    .update(users)
+    .set({ name, email, xAccount: xAccount || null, avatar: avatar || null, updatedAt: new Date() })
+    .where(eq(users.id, userId));
 }
 
 export async function savePathForUser(
@@ -61,7 +71,7 @@ export async function savePathForUser(
 ) {
   const title = input.title.trim();
   const description = input.description?.trim() ?? "";
-  const slug = slugify(input.slug || title);
+  const slug = input.id ? slugify(input.slug) : nanoid();
   if (title.length < 2 || slug.length < 2) throw new Error("Add a title and a valid slug.");
 
   if (input.id) {
@@ -73,12 +83,18 @@ export async function savePathForUser(
     if (!owned.length) throw new Error("Path not found.");
     await db
       .update(paths)
-      .set({ title, description: description || null, slug, isPublic: input.isPublic, updatedAt: new Date() })
+      .set({
+        title,
+        description: description || null,
+        slug,
+        isPublic: input.isPublic,
+        updatedAt: new Date(),
+      })
       .where(eq(paths.id, input.id));
     return input.id;
   }
 
-  const id = crypto.randomUUID();
+  const id = nanoid();
   await db.insert(paths).values({
     id,
     userId,
@@ -111,10 +127,13 @@ export async function saveEntryForUser(
     .where(and(eq(entries.pathId, pathId), eq(entries.date, date)))
     .limit(1);
   if (existing[0]) {
-    await db.update(entries).set({ content, note: note || null }).where(eq(entries.id, existing[0].id));
+    await db
+      .update(entries)
+      .set({ content, note: note || null })
+      .where(eq(entries.id, existing[0].id));
     return existing[0].id;
   }
-  const id = crypto.randomUUID();
+  const id = nanoid();
   await db.insert(entries).values({ id, pathId, userId, date, content, note: note || null });
   return id;
 }
@@ -124,9 +143,19 @@ export async function listUserPaths(userId: string) {
 }
 
 export async function getUserPath(userId: string, id: string) {
-  const path = (await db.select().from(paths).where(and(eq(paths.id, id), eq(paths.userId, userId))).limit(1))[0];
+  const path = (
+    await db
+      .select()
+      .from(paths)
+      .where(and(eq(paths.id, id), eq(paths.userId, userId)))
+      .limit(1)
+  )[0];
   if (!path) return null;
-  const logs = await db.select().from(entries).where(eq(entries.pathId, id)).orderBy(asc(entries.date));
+  const logs = await db
+    .select()
+    .from(entries)
+    .where(eq(entries.pathId, id))
+    .orderBy(asc(entries.date));
   return { path, entries: logs };
 }
 
@@ -140,8 +169,30 @@ export async function getPublicPath(slug: string) {
       .limit(1)
   )[0];
   if (!record) return null;
-  const logs = await db.select().from(entries).where(eq(entries.pathId, record.path.id)).orderBy(asc(entries.date));
+  const logs = await db
+    .select()
+    .from(entries)
+    .where(eq(entries.pathId, record.path.id))
+    .orderBy(asc(entries.date));
   return { ...record, entries: logs };
+}
+
+export async function getPublicProfile(userId: string) {
+  const user = (await db.select().from(users).where(eq(users.id, userId)).limit(1))[0];
+  if (!user) return null;
+  const publicPaths = await db
+    .select()
+    .from(paths)
+    .where(and(eq(paths.userId, userId), eq(paths.isPublic, true)))
+    .orderBy(desc(paths.updatedAt));
+  const publicEntries = publicPaths.length
+    ? await db
+        .select()
+        .from(entries)
+        .where(inArray(entries.pathId, publicPaths.map((path) => path.id)))
+        .orderBy(desc(entries.date))
+    : [];
+  return { user, paths: publicPaths, entries: publicEntries };
 }
 
 export { destroySession, getCurrentUser };

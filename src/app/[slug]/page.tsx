@@ -5,6 +5,8 @@ import { entries, paths, users } from "@/db/schema";
 import { calculateStats } from "@/lib/stats";
 import { SiteHeader } from "@/components/site-header";
 import { CopyLink } from "@/components/copy-link";
+import { Card } from "@/components/ui/card";
+import Link from "next/link";
 export default async function PublicPath({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const result = await db
@@ -40,34 +42,39 @@ export default async function PublicPath({ params }: { params: Promise<{ slug: s
                   {record.user.name.slice(0, 1).toUpperCase()}
                 </span>
               )}
-              <p className="text-sm text-muted-foreground">{record.user.name}&apos;s learning path</p>
+              <Link href={`/profile/${record.user.id}`} className="text-sm text-muted-foreground hover:underline">
+                {record.user.name}&apos;s learning path
+              </Link>
             </div>
             <h1 className="mt-2 text-4xl font-bold tracking-tight">{record.path.title}</h1>
-            <p className="mt-3 max-w-xl text-lg text-muted-foreground">{record.path.description}</p>
+            <p className="mt-3 max-w-xl text-lg text-muted-foreground">
+              {record.path.description || "A public record of steady progress."}
+            </p>
           </div>
           <CopyLink slug={record.path.slug} />
         </div>
         <div className="mt-10 grid grid-cols-3 gap-3">
           <Stat label="Current streak" value={stats.current} />
           <Stat label="Longest streak" value={stats.longest} />
-          <Stat label="Days logged" value={stats.total} />
+          <Stat label="Days completed" value={stats.total} />
         </div>
+        <Activity dates={stats.dates} />
         <section className="mt-10">
           <h2 className="mb-4 text-lg font-semibold">Progress</h2>
           {logs.length ? (
             <div className="space-y-3">
               {[...logs].reverse().map((entry) => (
-                <article key={entry.id} className="rounded-xl border p-5">
+                <Card key={entry.id} className="p-5">
                   <p className="text-xs font-medium text-muted-foreground">{entry.date}</p>
                   <p className="mt-2">{entry.content}</p>
                   {entry.note && <p className="mt-2 text-sm text-muted-foreground">{entry.note}</p>}
-                </article>
+                </Card>
               ))}
             </div>
           ) : (
-            <div className="rounded-xl border border-dashed p-10 text-center text-muted-foreground">
+            <Card className="border-dashed p-10 text-center text-muted-foreground">
               This path is ready for its first entry.
-            </div>
+            </Card>
           )}
         </section>
         <p className="mt-12 text-center text-sm text-muted-foreground">
@@ -87,5 +94,27 @@ function Stat({ label, value }: { label: string; value: number }) {
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="mt-1 text-xl font-semibold">{value}</p>
     </div>
+  );
+}
+
+function Activity({ dates }: { dates: string[] }) {
+  const logged = new Set(dates);
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  return (
+    <section className="mt-8 rounded-xl border p-5">
+      <div className="flex items-center justify-between">
+        <h2 className="font-semibold">Activity</h2>
+        <span className="text-xs text-muted-foreground">Last 10 weeks</span>
+      </div>
+      <div className="mt-4 grid grid-cols-10 gap-1.5 sm:grid-cols-14">
+        {Array.from({ length: 70 }, (_, index) => {
+          const date = new Date(today.getTime() - (69 - index) * 86400000)
+            .toISOString()
+            .slice(0, 10);
+          return <span key={date} title={date} className={`aspect-square rounded-sm ${logged.has(date) ? "bg-foreground" : "bg-muted"}`} />;
+        })}
+      </div>
+    </section>
   );
 }
