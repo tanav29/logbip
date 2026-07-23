@@ -16,6 +16,9 @@ export async function SiteHeader() {
               <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">
                 Dashboard
               </Link>
+              <Link href="/settings" className="text-muted-foreground hover:text-foreground">
+                Settings
+              </Link>
               <form action={logout}>
                 <button className="text-muted-foreground hover:text-foreground">Sign out</button>
               </form>

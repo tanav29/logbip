@@ -27,7 +27,21 @@ export default async function PublicPath({ params }: { params: Promise<{ slug: s
       <main className="mx-auto w-full max-w-3xl px-5 py-12">
         <div className="flex flex-wrap items-start justify-between gap-5">
           <div>
-            <p className="text-sm text-muted-foreground">{record.user.name}&apos;s learning path</p>
+            <div className="flex items-center gap-3">
+              {record.user.avatar ? (
+                <span
+                  className="size-10 rounded-full border bg-cover bg-center"
+                  style={{ backgroundImage: `url(${record.user.avatar})` }}
+                  role="img"
+                  aria-label={`${record.user.name}'s avatar`}
+                />
+              ) : (
+                <span className="flex size-10 items-center justify-center rounded-full bg-muted text-sm font-semibold">
+                  {record.user.name.slice(0, 1).toUpperCase()}
+                </span>
+              )}
+              <p className="text-sm text-muted-foreground">{record.user.name}&apos;s learning path</p>
+            </div>
             <h1 className="mt-2 text-4xl font-bold tracking-tight">{record.path.title}</h1>
             <p className="mt-3 max-w-xl text-lg text-muted-foreground">{record.path.description}</p>
           </div>

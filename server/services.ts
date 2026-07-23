@@ -1,4 +1,4 @@
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, ne } from "drizzle-orm";
 import { db } from "@/db";
 import { entries, paths, users } from "@/db/schema";
 import {
@@ -38,6 +38,21 @@ export async function loginUser(email: string, password: string) {
     throw new Error("Invalid email or password.");
   await createSession(result[0].id);
   return result[0];
+}
+
+export async function updateProfileForUser(
+  userId: string,
+  input: { name: string; email: string; xAccount?: string; avatar?: string },
+) {
+  const name = input.name.trim();
+  const email = input.email.trim().toLowerCase();
+  const xAccount = input.xAccount?.trim().replace(/^@/, "") ?? "";
+  const avatar = input.avatar?.trim() ?? "";
+  if (name.length < 2 || !/^\S+@\S+\.\S+$/.test(email)) throw new Error("Enter a name and valid email address.");
+  if (avatar && !/^https?:\/\/\S+$/i.test(avatar)) throw new Error("Avatar must be a valid http(s) image URL.");
+  const existing = await db.select({ id: users.id }).from(users).where(and(eq(users.email, email), ne(users.id, userId))).limit(1);
+  if (existing.length) throw new Error("That email address is already in use.");
+  await db.update(users).set({ name, email, xAccount: xAccount || null, avatar: avatar || null, updatedAt: new Date() }).where(eq(users.id, userId));
 }
 
 export async function savePathForUser(

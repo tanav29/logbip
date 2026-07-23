@@ -10,6 +10,7 @@ import {
   registerUser,
   saveEntryForUser,
   savePathForUser,
+  updateProfileForUser,
 } from "@/../server/services";
 
 export async function register(form: FormData) {
@@ -55,4 +56,16 @@ export async function saveEntry(form: FormData) {
   });
   revalidatePath(`/dashboard/paths/${pathId}`);
   revalidatePath("/dashboard");
+}
+
+export async function updateProfile(form: FormData) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error("Unauthorized");
+  await updateProfileForUser(user.id, {
+    name: formValue(form, "name"), email: formValue(form, "email"),
+    xAccount: formValue(form, "xAccount"), avatar: formValue(form, "avatar"),
+  });
+  revalidatePath("/settings");
+  revalidatePath("/dashboard");
+  redirect("/settings?saved=1");
 }

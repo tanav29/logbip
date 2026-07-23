@@ -33,4 +33,6 @@ Deploy the Next.js app to Vercel or another Node-compatible host. Configure `DAT
 3. Add consecutive and non-consecutive entries to exercise streaks and the heatmap.
 4. Open the public `/<slug>` URL while logged out.
 
+5. Open **Settings** from the dashboard header to update your name, email, X handle, or avatar URL. The name and avatar are reflected on public path pages.
+
 Private paths and all mutations use server-side session and ownership checks. Duplicate entries for a path/date are updated instead of duplicated.
