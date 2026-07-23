@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { SiteHeader } from "@/components/site-header";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center px-4">
+    <><SiteHeader /><div className="flex flex-1 items-center justify-center px-4">
       <main className="flex flex-col items-center gap-8 text-center max-w-lg">
         <h1 className="text-4xl font-bold tracking-tight">LogBip</h1>
         <p className="text-lg text-muted-foreground">
@@ -23,6 +24,6 @@ export default function Home() {
           </Link>
         </div>
       </main>
-    </div>
+    </div></>
   );
 }

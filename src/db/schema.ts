@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, uniqueIndex, index } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
@@ -48,4 +48,16 @@ export const entries = sqliteTable("entries", {
   createdAt: integer("created_at", { mode: "timestamp" })
     .$default(() => new Date())
     .notNull(),
-});
+}, (table) => ({
+  pathDateUnique: uniqueIndex("entries_path_date_unique").on(table.pathId, table.date),
+  pathDateIndex: index("entries_path_date_idx").on(table.pathId, table.date),
+}));
+
+export const sessions = sqliteTable("sessions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").references(() => users.id).notNull(),
+  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).$default(() => new Date()).notNull(),
+}, (table) => ({
+  userIndex: index("sessions_user_idx").on(table.userId),
+}));
