@@ -12,7 +12,7 @@ export default function NewPath() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto w-full max-w-2xl px-5 py-10">
+      <main className="mx-auto w-full max-w-2xl px-5 py-12">
         <Button
           variant="link"
           className="h-auto px-0 text-muted-foreground"
@@ -20,7 +20,7 @@ export default function NewPath() {
         >
           ← Dashboard
         </Button>
-        <h1 className="mt-6 text-3xl font-bold">Create a learning path</h1>
+        <h1 className="mt-6 text-3xl font-semibold tracking-tight">Create a learning path</h1>
         <p className="mt-2 text-muted-foreground">
           Give your practice a home and make progress visible.
         </p>
@@ -42,7 +42,7 @@ export function PathForm({
   };
 }) {
   return (
-    <Card className="mt-8 p-6">
+    <Card className="mt-8 p-6 sm:p-8">
       <form action={savePath} className="space-y-5">
         <input type="hidden" name="id" value={initial?.id ?? ""} />
         <Label className="grid gap-2">
@@ -51,7 +51,7 @@ export function PathForm({
             required
             name="title"
             defaultValue={initial?.title}
-            placeholder="e.g. Learn TypeScript"
+            placeholder="e.g. Learn TypeScript…"
           />
         </Label>
         <Label className="grid gap-2">

@@ -28,13 +28,15 @@ export default function Home() {
     <>
       <SiteHeader />
       <main>
-        <section className="mx-auto grid w-full max-w-6xl gap-12 px-5 pb-20 pt-20 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:pb-28 lg:pt-28">
+        <section className="mx-auto grid w-full max-w-6xl gap-16 px-5 pb-20 pt-20 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:pb-28 lg:pt-28">
           <div>
-            <Badge variant="outline" className="mb-5">
+            <Badge variant="outline" className="mb-6 rounded-full px-3 py-1 text-xs font-normal">
               A calmer way to learn in public
             </Badge>
-            <h1 className="max-w-3xl text-5xl font-bold tracking-tight sm:text-6xl">
-              Make progress visible.
+            <h1 className="max-w-3xl text-5xl font-semibold tracking-[-0.04em] sm:text-7xl">
+              Make progress
+              <br />
+              visible.
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-8 text-muted-foreground">
               LogBip turns everyday learning into a public record you can be proud of. Keep your
@@ -52,7 +54,7 @@ export default function Home() {
               Free to start · No noisy feeds · Your work, your pace
             </p>
           </div>
-          <div className="relative rounded-2xl border bg-muted/40 p-4 shadow-sm sm:p-6">
+          <div className="relative rounded-2xl border border-border/80 bg-muted/20 p-3 sm:p-5">
             <Card>
               <CardHeader>
                 <div className="flex items-start justify-between gap-4">
@@ -102,11 +104,13 @@ export default function Home() {
             </Card>
           </div>
         </section>
-        <section className="border-y bg-muted/30">
+        <section className="border-y border-border/80 bg-muted/20">
           <div className="mx-auto grid w-full max-w-6xl gap-8 px-5 py-14 md:grid-cols-3">
             {steps.map(({ icon: Icon, title, text }) => (
               <div key={title}>
-                <Icon className="size-5" />
+                <div className="flex size-8 items-center justify-center rounded-full border border-border bg-background">
+                  <Icon className="size-4" />
+                </div>
                 <h2 className="mt-4 font-semibold">{title}</h2>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">{text}</p>
               </div>

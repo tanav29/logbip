@@ -30,10 +30,14 @@ export default async function Dashboard() {
       <SiteHeader />
       <div className="bg-gradient-glow" />
       <main className="mx-auto w-full max-w-6xl px-5 py-10 relative">
-        <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-4 border-b border-border/80 pb-8">
           <div>
-            <p className="text-sm text-muted-foreground uppercase tracking-widest font-semibold">Your learning workspace</p>
-            <h1 className="mt-1 text-4xl font-bold tracking-tight gradient-text bg-[length:200%_auto]">Good to see you, {user.name.split(" ")[0]}.</h1>
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              Your learning workspace
+            </p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+              Good to see you, {user.name.split(" ")[0]}.
+            </h1>
           </div>
           <Button render={<Link href="/dashboard/paths/new" />}>New path</Button>
         </div>
@@ -48,7 +52,7 @@ export default async function Dashboard() {
             value={`${stats.longest} day${stats.longest === 1 ? "" : "s"}`}
           />
         </div>
-        <Card className="mb-10 p-5 glass-card border-none">
+        <Card className="mb-10 p-5 glass-card">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-semibold">Activity</h2>
             <span className="text-xs text-muted-foreground">Last 10 weeks</span>
@@ -58,7 +62,7 @@ export default async function Dashboard() {
               <span
                 key={cell.date}
                 title={`${cell.date}: ${cell.count} entr${cell.count === 1 ? "y" : "ies"}`}
-                className={`aspect-square w-5 h-5 rounded-sm ${cell.count ? "bg-foreground" : "bg-muted"}`}
+                className={`aspect-square h-5 w-5 rounded-sm ${cell.count ? "bg-foreground" : "bg-muted"}`}
               />
             ))}
           </div>
@@ -72,7 +76,7 @@ export default async function Dashboard() {
             {allPaths.length ? (
               <div className="grid gap-3">
                 {allPaths.map((path) => (
-                  <Card key={path.id} className="transition-all duration-300 hover:-translate-y-1 glass-card hover:border-primary/50">
+                  <Card key={path.id} className="glass-card">
                     <Link href={`/dashboard/paths/${path.id}`} className="block p-5">
                       <div className="flex items-start justify-between gap-4">
                         <div>

@@ -42,7 +42,10 @@ export default async function PublicPath({ params }: { params: Promise<{ slug: s
                   {record.user.name.slice(0, 1).toUpperCase()}
                 </span>
               )}
-              <Link href={`/profile/${record.user.id}`} className="text-sm text-muted-foreground hover:underline">
+              <Link
+                href={`/profile/${record.user.id}`}
+                className="text-sm text-muted-foreground hover:underline"
+              >
                 {record.user.name}&apos;s learning path
               </Link>
             </div>
@@ -112,7 +115,13 @@ function Activity({ dates }: { dates: string[] }) {
           const date = new Date(today.getTime() - (69 - index) * 86400000)
             .toISOString()
             .slice(0, 10);
-          return <span key={date} title={date} className={`aspect-square rounded-sm ${logged.has(date) ? "bg-foreground" : "bg-muted"}`} />;
+          return (
+            <span
+              key={date}
+              title={date}
+              className={`aspect-square rounded-sm ${logged.has(date) ? "bg-foreground" : "bg-muted"}`}
+            />
+          );
         })}
       </div>
     </section>

@@ -189,7 +189,12 @@ export async function getPublicProfile(userId: string) {
     ? await db
         .select()
         .from(entries)
-        .where(inArray(entries.pathId, publicPaths.map((path) => path.id)))
+        .where(
+          inArray(
+            entries.pathId,
+            publicPaths.map((path) => path.id),
+          ),
+        )
         .orderBy(desc(entries.date))
     : [];
   return { user, paths: publicPaths, entries: publicEntries };

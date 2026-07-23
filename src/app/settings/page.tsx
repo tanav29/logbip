@@ -22,7 +22,7 @@ export default async function SettingsPage({
       <SiteHeader />
       <main className="mx-auto w-full max-w-2xl px-5 py-10 sm:py-16">
         <p className="text-sm text-muted-foreground">Account</p>
-        <h1 className="mt-1 text-3xl font-bold tracking-tight">Profile settings</h1>
+        <h1 className="mt-1 text-3xl font-semibold tracking-tight">Profile settings</h1>
         <p className="mt-2 text-muted-foreground">
           Keep your public identity and account details up to date.
         </p>

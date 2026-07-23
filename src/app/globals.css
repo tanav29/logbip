@@ -49,7 +49,9 @@
   --animate-gradient: gradient 8s linear infinite;
 
   @keyframes gradient {
-    to { background-position: 200% center; }
+    to {
+      background-position: 200% center;
+    }
   }
 }
 
@@ -58,7 +60,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.47 0.17 283); /* Vivid Violet */
+  --primary: oklch(0.145 0 0);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -69,57 +71,57 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.47 0.17 283);
+  --ring: oklch(0.145 0 0);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+  --radius: 0.5rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.47 0.17 283);
+  --sidebar-primary: oklch(0.145 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.47 0.17 283);
-  --background: oklch(0.99 0.01 280);
+  --sidebar-ring: oklch(0.145 0 0);
+  --background: oklch(0.985 0 0);
   --foreground: oklch(0.145 0 0);
 }
 
 .dark {
-  --background: oklch(0.12 0.02 280); /* Deep dark violet/black */
+  --background: oklch(0.08 0 0);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.15 0.02 280);
+  --card: oklch(0.11 0 0);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.15 0.02 280);
+  --popover: oklch(0.11 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.65 0.15 283); /* Bright Violet */
+  --primary: oklch(0.985 0 0);
   --primary-foreground: oklch(0.1 0 0);
-  --secondary: oklch(0.2 0.03 280);
+  --secondary: oklch(0.16 0 0);
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.2 0.03 280);
-  --muted-foreground: oklch(0.7 0.02 280);
-  --accent: oklch(0.25 0.05 280);
+  --muted: oklch(0.16 0 0);
+  --muted-foreground: oklch(0.66 0 0);
+  --accent: oklch(0.2 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(0.25 0.03 280);
-  --input: oklch(0.25 0.03 280);
-  --ring: oklch(0.65 0.15 283);
+  --border: oklch(0.22 0 0);
+  --input: oklch(0.22 0 0);
+  --ring: oklch(0.985 0 0);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.15 0.02 280);
+  --sidebar: oklch(0.11 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.65 0.15 283);
+  --sidebar-primary: oklch(0.985 0 0);
   --sidebar-primary-foreground: oklch(0.1 0 0);
-  --sidebar-accent: oklch(0.2 0.03 280);
+  --sidebar-accent: oklch(0.16 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.25 0.03 280);
-  --sidebar-ring: oklch(0.65 0.15 283);
+  --sidebar-border: oklch(0.22 0 0);
+  --sidebar-ring: oklch(0.985 0 0);
 }
 
 @layer base {
@@ -127,24 +129,35 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground transition-colors duration-300;
+    @apply bg-background text-foreground;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
   }
   html {
     @apply font-sans;
+    color-scheme: dark;
+    scroll-behavior: smooth;
+  }
+  ::selection {
+    @apply bg-foreground text-background;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
   }
 }
 
 @layer utilities {
   .glass {
-    @apply bg-background/60 backdrop-blur-xl border border-white/10 shadow-lg;
+    @apply border border-border bg-card;
   }
   .glass-card {
-    @apply bg-card/60 backdrop-blur-xl border border-white/5 shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-white/10;
+    @apply border border-border bg-card transition-colors duration-150 hover:border-foreground/30;
   }
   .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-indigo-400 to-purple-400 animate-gradient;
+    @apply text-foreground;
   }
   .bg-gradient-glow {
-    @apply absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-background to-background;
+    @apply pointer-events-none absolute inset-x-0 top-0 -z-10 h-96 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.07),transparent_65%)];
   }
 }

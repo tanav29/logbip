@@ -14,8 +14,19 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MoreVertical, MessageSquarePlus, CheckCircle2 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default async function PathPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -40,47 +51,22 @@ export default async function PathPage({ params }: { params: Promise<{ id: strin
   return (
     <>
       <SiteHeader />
-      <div className="bg-gradient-glow" />
       <main className="mx-auto w-full max-w-4xl px-5 py-10 relative">
-        <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-          ← Dashboard
-        </Link>
         <div className="mt-6 flex flex-col gap-10">
           <section>
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <div className="flex items-center gap-3">
-                  <h1 className="text-4xl font-bold tracking-tight gradient-text bg-[length:200%_auto]">{path.title}</h1>
+                  <h1 className="text-4xl font-semibold tracking-tight">{path.title}</h1>
                   <Badge variant={path.isPublic ? "success" : "secondary"} className="shadow-sm">
                     {path.isPublic ? "Public" : "Private"}
                   </Badge>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger render={
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    } />
-                    <DropdownMenuContent align="start">
-                      <Dialog>
-                        <DialogTrigger render={
-                          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                            Edit path details
-                          </DropdownMenuItem>
-                        } />
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Edit Path</DialogTitle>
-                          </DialogHeader>
-                          <PathForm initial={path} />
-                        </DialogContent>
-                      </Dialog>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
                 <p className="mt-2 text-muted-foreground">
                   {path.description || "No description yet."}
                 </p>
               </div>
+              <div className="flex gap-1 items-center justify-center">
               <Button
                 variant="outline"
                 render={
@@ -91,26 +77,50 @@ export default async function PathPage({ params }: { params: Promise<{ id: strin
                   />
                 }
               >
-                View public page ↗
+                View public page
               </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger render={<Button
+                      variant="outline"
+                      size="icon"
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>} />
+                    <DropdownMenuContent align="end">
+                      <Dialog>
+                        <DialogTrigger>
+                          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                            Edit path details
+                          </DropdownMenuItem>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Edit Path</DialogTitle>
+                          </DialogHeader>
+                          <PathForm initial={path} />
+                        </DialogContent>
+                      </Dialog>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
-            
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+
+            <div className="mt-6 grid gap-4 sm:grid-cols-3">
               <Stat label="Current streak" value={stats.current} />
               <Stat label="Longest streak" value={stats.longest} />
               <Stat label="Days logged" value={stats.total} />
             </div>
-            
+
             <div className="mt-12">
               <div className="mb-6 flex items-center justify-between border-b pb-4">
                 <h2 className="text-xl font-semibold">Progress log</h2>
                 <Dialog>
-                  <DialogTrigger render={
-                    <Button size="sm" className="gap-2">
+                  <DialogTrigger>
+                    <Button className="gap-2">
                       <MessageSquarePlus className="h-4 w-4" />
-                      Add Log
+                      Add log
                     </Button>
-                  } />
+                  </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>Log a day</DialogTitle>
@@ -136,7 +146,8 @@ export default async function PathPage({ params }: { params: Promise<{ id: strin
                         />
                       </label>
                       <label className="block text-sm font-medium">
-                        Note<span className="ml-1 font-normal text-muted-foreground">(optional)</span>
+                        Note
+                        <span className="ml-1 font-normal text-muted-foreground">(optional)</span>
                         <Textarea name="note" rows={2} />
                       </label>
                       <Button className="w-full" type="submit">
@@ -150,28 +161,38 @@ export default async function PathPage({ params }: { params: Promise<{ id: strin
               {logs.length ? (
                 <div className="space-y-4">
                   {[...logs].reverse().map((entry) => (
-                    <div key={entry.id} className="group flex gap-4 rounded-xl p-5 glass-card">
-                      <div className="mt-0.5 text-primary">
-                        <CheckCircle2 className="h-5 w-5" />
-                      </div>
+                    <div key={entry.id} className="group flex gap-2">
+                      <CheckCircle2 className="h-5 w-5 fill-primary stroke-background" />
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-muted-foreground">{entry.date}</p>
+                          <div className="flex gap-2 items-center justify-center">
+                            <p className="text-base">{entry.content}</p>
+                            <p className="text-xs font-medium text-muted-foreground">{new Date(entry.date).toDateString()}</p>
+                          </div>
                           <DropdownMenu>
-                            <DropdownMenuTrigger render={
-                              <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            } />
+                            <DropdownMenuTrigger
+                              render={
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
+                                >
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              }
+                            />
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem>Edit log</DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive focus:text-destructive">Delete log</DropdownMenuItem>
+                              <DropdownMenuItem className="text-destructive focus:text-destructive">
+                                Delete log
+                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
-                        <p className="text-base">{entry.content}</p>
                         {entry.note && (
-                          <p className="mt-2 text-sm text-muted-foreground bg-muted p-2 rounded-md">{entry.note}</p>
+                          <p className="text-sm text-muted-foreground bg-muted p-2 rounded-md">
+                            {entry.note}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -192,9 +213,11 @@ export default async function PathPage({ params }: { params: Promise<{ id: strin
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl p-5 glass-card border-none">
-      <p className="text-sm text-muted-foreground uppercase tracking-widest font-semibold">{label}</p>
-      <p className="mt-2 text-3xl font-bold tracking-tight">{value}</p>
+    <div className="border-none">
+      <p className="text-xs text-muted-foreground uppercase">
+        {label}
+      </p>
+      <p className="mt-2 text-2xl font-bold tracking-tight">{value}</p>
     </div>
   );
 }
