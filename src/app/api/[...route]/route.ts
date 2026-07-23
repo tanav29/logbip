@@ -1,14 +1,5 @@
-import { Hono } from "hono";
 import { handle } from "hono/vercel";
-import { logger } from "hono/logger";
-import { cors } from "hono/cors";
-
-const app = new Hono().basePath("/api");
-
-app.use("*", logger());
-app.use("*", cors());
-
-app.get("/health", (c) => c.json({ status: "ok" }));
+import app from "../../../../server";
 
 export const GET = handle(app);
 export const POST = handle(app);

@@ -8,7 +8,9 @@ import { sessions, users } from "@/db/schema";
 const COOKIE = "logbip_session";
 const DAYS = 30;
 
-function digest(value: string) { return createHash("sha256").update(value).digest("hex"); }
+function digest(value: string) {
+  return createHash("sha256").update(value).digest("hex");
+}
 
 export function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
@@ -25,14 +27,27 @@ export function verifyPassword(password: string, stored: string) {
 
 export async function createSession(userId: string) {
   const raw = randomBytes(32).toString("hex");
-  await db.insert(sessions).values({ id: digest(raw), userId, expiresAt: new Date(Date.now() + DAYS * 86400000) });
-  (await cookies()).set(COOKIE, raw, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: DAYS * 86400 });
+  await db
+    .insert(sessions)
+    .values({ id: digest(raw), userId, expiresAt: new Date(Date.now() + DAYS * 86400000) });
+  (await cookies()).set(COOKIE, raw, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: DAYS * 86400,
+  });
 }
 
 export async function getCurrentUser() {
   const raw = (await cookies()).get(COOKIE)?.value;
   if (!raw) return null;
-  const result = await db.select({ user: users }).from(sessions).innerJoin(users, eq(sessions.userId, users.id)).where(and(eq(sessions.id, digest(raw)), gt(sessions.expiresAt, new Date()))).limit(1);
+  const result = await db
+    .select({ user: users })
+    .from(sessions)
+    .innerJoin(users, eq(sessions.userId, users.id))
+    .where(and(eq(sessions.id, digest(raw)), gt(sessions.expiresAt, new Date())))
+    .limit(1);
   return result[0]?.user ?? null;
 }
 

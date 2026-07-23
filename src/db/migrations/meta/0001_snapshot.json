@@ -60,18 +60,12 @@
       "indexes": {
         "entries_path_date_unique": {
           "name": "entries_path_date_unique",
-          "columns": [
-            "path_id",
-            "date"
-          ],
+          "columns": ["path_id", "date"],
           "isUnique": true
         },
         "entries_path_date_idx": {
           "name": "entries_path_date_idx",
-          "columns": [
-            "path_id",
-            "date"
-          ],
+          "columns": ["path_id", "date"],
           "isUnique": false
         }
       },
@@ -80,12 +74,8 @@
           "name": "entries_path_id_paths_id_fk",
           "tableFrom": "entries",
           "tableTo": "paths",
-          "columnsFrom": [
-            "path_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["path_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -93,12 +83,8 @@
           "name": "entries_user_id_users_id_fk",
           "tableFrom": "entries",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -170,9 +156,7 @@
       "indexes": {
         "paths_slug_unique": {
           "name": "paths_slug_unique",
-          "columns": [
-            "slug"
-          ],
+          "columns": ["slug"],
           "isUnique": true
         }
       },
@@ -181,12 +165,8 @@
           "name": "paths_user_id_users_id_fk",
           "tableFrom": "paths",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -230,9 +210,7 @@
       "indexes": {
         "sessions_user_idx": {
           "name": "sessions_user_idx",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         }
       },
@@ -241,12 +219,8 @@
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -318,9 +292,7 @@
       "indexes": {
         "users_email_unique": {
           "name": "users_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },

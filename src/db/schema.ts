@@ -34,30 +34,42 @@ export const paths = sqliteTable("paths", {
     .notNull(),
 });
 
-export const entries = sqliteTable("entries", {
-  id: text("id").primaryKey(),
-  pathId: text("path_id")
-    .references(() => paths.id)
-    .notNull(),
-  userId: text("user_id")
-    .references(() => users.id)
-    .notNull(),
-  content: text("content").notNull(),
-  note: text("note"),
-  date: text("date").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .$default(() => new Date())
-    .notNull(),
-}, (table) => ({
-  pathDateUnique: uniqueIndex("entries_path_date_unique").on(table.pathId, table.date),
-  pathDateIndex: index("entries_path_date_idx").on(table.pathId, table.date),
-}));
+export const entries = sqliteTable(
+  "entries",
+  {
+    id: text("id").primaryKey(),
+    pathId: text("path_id")
+      .references(() => paths.id)
+      .notNull(),
+    userId: text("user_id")
+      .references(() => users.id)
+      .notNull(),
+    content: text("content").notNull(),
+    note: text("note"),
+    date: text("date").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .$default(() => new Date())
+      .notNull(),
+  },
+  (table) => ({
+    pathDateUnique: uniqueIndex("entries_path_date_unique").on(table.pathId, table.date),
+    pathDateIndex: index("entries_path_date_idx").on(table.pathId, table.date),
+  }),
+);
 
-export const sessions = sqliteTable("sessions", {
-  id: text("id").primaryKey(),
-  userId: text("user_id").references(() => users.id).notNull(),
-  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }).$default(() => new Date()).notNull(),
-}, (table) => ({
-  userIndex: index("sessions_user_idx").on(table.userId),
-}));
+export const sessions = sqliteTable(
+  "sessions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .references(() => users.id)
+      .notNull(),
+    expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .$default(() => new Date())
+      .notNull(),
+  },
+  (table) => ({
+    userIndex: index("sessions_user_idx").on(table.userId),
+  }),
+);
