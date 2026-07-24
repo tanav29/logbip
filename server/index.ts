@@ -4,6 +4,8 @@ import { logger } from "hono/logger";
 import { calculateStats } from "@/lib/stats";
 import {
   destroySession,
+  deleteEntryForUser,
+  deletePathForUser,
   getCurrentUser,
   getPublicPath,
   getUserPath,
@@ -12,6 +14,7 @@ import {
   registerUser,
   saveEntryForUser,
   savePathForUser,
+  updateEntryForUser,
 } from "./services";
 
 type Variables = { user: NonNullable<Awaited<ReturnType<typeof getCurrentUser>>> };
@@ -74,17 +77,15 @@ app.post("/paths", async (c) => {
       id?: string;
       title?: string;
       description?: string;
-      slug?: string;
       isPublic?: boolean;
     }>();
-    const id = await savePathForUser(c.get("user").id, {
+    const result = await savePathForUser(c.get("user").id, {
       id: body.id,
       title: body.title ?? "",
       description: body.description,
-      slug: body.slug ?? "",
       isPublic: body.isPublic ?? true,
     });
-    return c.json({ id }, body.id ? 200 : 201);
+    return c.json(result, body.id ? 200 : 201);
   } catch (error) {
     return c.json({ error: error instanceof Error ? error.message : "Unable to save path." }, 400);
   }
@@ -102,6 +103,47 @@ app.post("/paths/:id/entries", async (c) => {
     return c.json({ id }, 201);
   } catch (error) {
     return c.json({ error: error instanceof Error ? error.message : "Unable to save entry." }, 400);
+  }
+});
+
+app.patch("/paths/:id/entries/:entryId", async (c) => {
+  try {
+    const body = await c.req.json<{ date?: string; content?: string; note?: string }>();
+    await updateEntryForUser(c.get("user").id, c.req.param("entryId"), {
+      date: body.date ?? "",
+      content: body.content ?? "",
+      note: body.note,
+    });
+    return c.json({ ok: true });
+  } catch (error) {
+    return c.json(
+      { error: error instanceof Error ? error.message : "Unable to update entry." },
+      400,
+    );
+  }
+});
+
+app.delete("/paths/:id", async (c) => {
+  try {
+    await deletePathForUser(c.get("user").id, c.req.param("id"));
+    return c.json({ ok: true });
+  } catch (error) {
+    return c.json(
+      { error: error instanceof Error ? error.message : "Unable to delete path." },
+      404,
+    );
+  }
+});
+
+app.delete("/paths/:id/entries/:entryId", async (c) => {
+  try {
+    await deleteEntryForUser(c.get("user").id, c.req.param("entryId"));
+    return c.json({ ok: true });
+  } catch (error) {
+    return c.json(
+      { error: error instanceof Error ? error.message : "Unable to delete entry." },
+      404,
+    );
   }
 });
 

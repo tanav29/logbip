@@ -5,7 +5,6 @@ import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/db";
 import { entries, paths } from "@/db/schema";
 import { calculateStats } from "@/lib/stats";
-import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,21 +26,20 @@ export default async function Dashboard() {
   const stats = calculateStats(allEntries.map((entry) => entry.date));
   return (
     <>
-      <SiteHeader />
-      <main className="mx-auto w-full max-w-6xl px-5 py-10 relative">
-        <div className="mb-10 flex flex-wrap items-end justify-between gap-4 border-b border-border/80 pb-8">
+      <main className="relative mx-auto w-full max-w-6xl px-5 py-10">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-7">
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
               Your learning workspace
             </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+            <h1 className="mt-2 text-3xl font-semibold tracking-[-0.03em]">
               Good to see you, {user.name.split(" ")[0]}.
             </h1>
           </div>
-          <Button render={<Link href="/dashboard/paths/new" />}>New path</Button>
+          <Button render={<Link href="/dashboard/new" />}>New path</Button>
         </div>
-        <Card className="mb-10 p-5 glass-card">
-          <div className="flex items-center justify-around">
+        <Card className="glass-card mb-10 p-5">
+          <div className="grid grid-cols-3 divide-x divide-border">
             <Stat label="Active paths" value={allPaths.length} />
             <Stat
               label="Current streak"
@@ -52,18 +50,18 @@ export default async function Dashboard() {
               value={`${stats.longest} day${stats.longest === 1 ? "" : "s"}`}
             />
           </div>
-          <div className="grid grid-cols-10 grid-rows-7">
+          <div className="mt-7 grid grid-flow-col grid-rows-7 gap-1 overflow-x-auto">
             {heatmap(stats.dates).map((cell) => (
               <span
                 key={cell.date}
                 title={`${cell.date}: ${cell.count} entr${cell.count === 1 ? "y" : "ies"}`}
-                className={`aspect-square h-3 w-3 ${cell.count ? "bg-foreground" : "bg-muted"}`}
+                className={`size-3 rounded-[3px] ${cell.count === 0 ? "bg-muted" : cell.count === 1 ? "bg-foreground/35" : cell.count < 3 ? "bg-foreground/65" : "bg-foreground"}`}
               />
             ))}
           </div>
-          <div className="flex items-center justify-between">
+          <div className="mt-3 flex items-center justify-between">
             <h2 className="font-semibold">Activity</h2>
-            <span className="text-xs text-muted-foreground">Last 10 weeks</span>
+            <span className="text-xs text-muted-foreground">Last year</span>
           </div>
         </Card>
         <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
@@ -99,7 +97,7 @@ export default async function Dashboard() {
                 <p className="mt-1 text-sm text-muted-foreground">
                   Create a small, specific learning goal.
                 </p>
-                <Button variant="link" render={<Link href="/dashboard/paths/new" />}>
+                <Button variant="link" render={<Link href="/dashboard/new" />}>
                   Create a path
                 </Button>
               </div>
@@ -132,9 +130,12 @@ function heatmap(dates: string[]) {
   dates.forEach((date) => counts.set(date, (counts.get(date) ?? 0) + 1));
   const end = new Date();
   end.setUTCHours(0, 0, 0, 0);
-  const start = new Date(end.getTime() - 69 * 86400000);
-  return Array.from({ length: 70 }, (_, index) => {
-    const date = new Date(start.getTime() + index * 86400000).toISOString().slice(0, 10);
+  const start = new Date(end);
+  start.setUTCDate(start.getUTCDate() - 364);
+  return Array.from({ length: 365 }, (_, index) => {
+    const dateValue = new Date(start);
+    dateValue.setUTCDate(start.getUTCDate() + index);
+    const date = dateValue.toISOString().slice(0, 10);
     return { date, count: counts.get(date) ?? 0 };
   });
 }

@@ -1,21 +1,21 @@
-import { sqliteTable, text, integer, uniqueIndex, index } from "drizzle-orm/sqlite-core";
+import { pgTable, text, timestamp, boolean, uniqueIndex, index } from "drizzle-orm/pg-core";
 
-export const users = sqliteTable("users", {
+export const users = pgTable("users", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").unique().notNull(),
   passwordHash: text("password_hash").notNull(),
   xAccount: text("x_account"),
   avatar: text("avatar"),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: timestamp("created_at")
     .$default(() => new Date())
     .notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+  updatedAt: timestamp("updated_at")
     .$default(() => new Date())
     .notNull(),
 });
 
-export const paths = sqliteTable("paths", {
+export const paths = pgTable("paths", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .references(() => users.id)
@@ -23,18 +23,19 @@ export const paths = sqliteTable("paths", {
   slug: text("slug").unique().notNull(),
   title: text("title").notNull(),
   description: text("description"),
-  isPublic: integer("is_public", { mode: "boolean" })
+  banner: text("banner"),
+  isPublic: boolean("is_public")
     .$default(() => true)
     .notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: timestamp("created_at")
     .$default(() => new Date())
     .notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+  updatedAt: timestamp("updated_at")
     .$default(() => new Date())
     .notNull(),
 });
 
-export const entries = sqliteTable(
+export const entries = pgTable(
   "entries",
   {
     id: text("id").primaryKey(),
@@ -47,7 +48,10 @@ export const entries = sqliteTable(
     content: text("content").notNull(),
     note: text("note"),
     date: text("date").notNull(),
-    createdAt: integer("created_at", { mode: "timestamp" })
+    createdAt: timestamp("created_at")
+      .$default(() => new Date())
+      .notNull(),
+    updatedAt: timestamp("updated_at")
       .$default(() => new Date())
       .notNull(),
   },
@@ -57,19 +61,36 @@ export const entries = sqliteTable(
   }),
 );
 
-export const sessions = sqliteTable(
+export const sessions = pgTable(
   "sessions",
   {
     id: text("id").primaryKey(),
     userId: text("user_id")
       .references(() => users.id)
       .notNull(),
-    expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
-    createdAt: integer("created_at", { mode: "timestamp" })
+    expiresAt: timestamp("expires_at").notNull(),
+    createdAt: timestamp("created_at")
       .$default(() => new Date())
       .notNull(),
   },
   (table) => ({
     userIndex: index("sessions_user_idx").on(table.userId),
+  }),
+);
+
+export const feedback = pgTable(
+  "feedback",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .references(() => users.id)
+      .notNull(),
+    message: text("message").notNull(),
+    createdAt: timestamp("created_at")
+      .$default(() => new Date())
+      .notNull(),
+  },
+  (table) => ({
+    userIndex: index("feedback_user_idx").on(table.userId),
   }),
 );

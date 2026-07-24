@@ -1,11 +1,9 @@
 import Link from "next/link";
 import { register } from "@/app/actions";
 import { AuthForm } from "@/components/auth-form";
-import { SiteHeader } from "@/components/site-header";
 export default function RegisterPage() {
   return (
     <>
-      <SiteHeader />
       <main className="mx-auto w-full max-w-md px-5 py-20">
         <p className="mb-2 text-sm font-medium text-muted-foreground">
           Start your public learning log

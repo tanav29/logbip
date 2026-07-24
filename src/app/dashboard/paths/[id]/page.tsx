@@ -6,9 +6,8 @@ import { entries, paths } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { calculateStats } from "@/lib/stats";
 import { today } from "@/lib/utils";
-import { SiteHeader } from "@/components/site-header";
 import { ProgressNode } from "@/components/progress-node";
-import { PathForm } from "../new/page";
+import { PathForm } from "../../new/page";
 import { saveEntry } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -138,7 +137,7 @@ export default async function PathPage({ params }: { params: Promise<{ id: strin
           {logs.length ? (
             <div className="space-y-4">
               {[...logs].reverse().map((entry) => (
-                <ProgressNode key={entry.id} entry={entry} />
+                <ProgressNode key={entry.id} pathId={path.id} entry={entry} />
               ))}
             </div>
           ) : (

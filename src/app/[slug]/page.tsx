@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { entries, paths, users } from "@/db/schema";
 import { calculateStats } from "@/lib/stats";
-import { SiteHeader } from "@/components/site-header";
 import { CopyLink } from "@/components/copy-link";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
@@ -25,7 +24,6 @@ export default async function PublicPath({ params }: { params: Promise<{ slug: s
   const stats = calculateStats(logs.map((entry) => entry.date));
   return (
     <>
-      <SiteHeader />
       <main className="mx-auto w-full max-w-3xl px-5 py-12">
         <div className="flex flex-wrap items-start justify-between gap-5">
           <div>

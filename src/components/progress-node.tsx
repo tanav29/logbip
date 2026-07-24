@@ -12,13 +12,57 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 type ProgressNodeProps = {
+  pathId: string;
   entry: InferSelectModel<typeof entries>;
 };
 
-export function ProgressNode({ entry }: ProgressNodeProps) {
+export function ProgressNode({ pathId, entry }: ProgressNodeProps) {
   const [more, setMore] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const router = useRouter();
+
+  async function updateLog(form: FormData) {
+    setSaving(true);
+    setError(null);
+    const response = await fetch(`/api/paths/${pathId}/entries/${entry.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        date: form.get("date"),
+        content: form.get("content"),
+        note: form.get("note"),
+      }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      setError(result.error ?? "Unable to update log.");
+      setSaving(false);
+      return;
+    }
+    setSaving(false);
+    setEditing(false);
+    router.refresh();
+  }
+
+  async function deleteLog() {
+    if (!window.confirm("Delete this log? This cannot be undone.")) return;
+    setError(null);
+    const response = await fetch(`/api/paths/${pathId}/entries/${entry.id}`, { method: "DELETE" });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      setError(result.error ?? "Unable to delete log.");
+      return;
+    }
+    router.refresh();
+  }
 
   return (
     <div className="flex flex-col gap-2">
@@ -38,8 +82,11 @@ export function ProgressNode({ entry }: ProgressNodeProps) {
             }
           />
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>Edit log</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive focus:text-destructive">
+            <DropdownMenuItem onClick={() => setEditing(true)}>Edit log</DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={deleteLog}
+              className="text-destructive focus:text-destructive"
+            >
               Delete log
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -56,6 +103,31 @@ export function ProgressNode({ entry }: ProgressNodeProps) {
           {more && <Markdown>{entry.note}</Markdown>}
         </div>
       )}
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      <Dialog open={editing} onOpenChange={setEditing}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit log</DialogTitle>
+          </DialogHeader>
+          <form action={updateLog} className="space-y-4">
+            <label className="block text-sm font-medium">
+              Date
+              <Input required type="date" name="date" defaultValue={entry.date} />
+            </label>
+            <label className="block text-sm font-medium">
+              What did you do?
+              <Textarea required name="content" rows={4} defaultValue={entry.content} />
+            </label>
+            <label className="block text-sm font-medium">
+              Note <span className="font-normal text-muted-foreground">(optional)</span>
+              <Textarea name="note" rows={2} defaultValue={entry.note ?? ""} />
+            </label>
+            <Button className="w-full" type="submit" disabled={saving}>
+              {saving ? "Saving…" : "Save changes"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

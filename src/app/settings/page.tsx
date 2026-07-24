@@ -1,25 +1,24 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { SiteHeader } from "@/components/site-header";
 import { getCurrentUser } from "@/lib/auth";
-import { updateProfile } from "@/app/actions";
+import { logout, submitFeedback, updateProfile } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ saved?: string }>;
+  searchParams: Promise<{ saved?: string; feedback?: string }>;
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  const { saved } = await searchParams;
+  const { saved, feedback } = await searchParams;
   return (
     <>
-      <SiteHeader />
       <main className="mx-auto w-full max-w-2xl px-5 py-10 sm:py-16">
         <p className="text-sm text-muted-foreground">Account</p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight">Profile settings</h1>
@@ -36,6 +35,11 @@ export default async function SettingsPage({
         {saved === "1" && (
           <Badge variant="success" className="mt-6">
             Your profile has been updated.
+          </Badge>
+        )}
+        {feedback === "1" && (
+          <Badge variant="success" className="mt-6">
+            Thanks for sharing your feedback.
           </Badge>
         )}
         <Card className="mt-8 p-5 sm:p-7">
@@ -80,6 +84,28 @@ export default async function SettingsPage({
             </div>
           </form>
         </Card>
+        <Card className="mt-8 p-5 sm:p-7">
+          <h2 className="font-semibold">Share feedback</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Tell us what is working, what is confusing, or what you would like to see next.
+          </p>
+          <form action={submitFeedback} className="mt-5 space-y-4">
+            <Label className="grid gap-2">
+              Your feedback
+              <Textarea name="message" required minLength={3} maxLength={2000} rows={5} />
+            </Label>
+            <div className="flex justify-end border-t pt-5">
+              <Button type="submit">Send feedback</Button>
+            </div>
+          </form>
+        </Card>
+        <div className="mt-8 flex justify-end border-t pt-6">
+          <form action={logout}>
+            <Button type="submit" variant="outline">
+              Log out
+            </Button>
+          </form>
+        </div>
       </main>
     </>
   );

@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, inArray, ne } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { db } from "@/db";
-import { entries, paths, users } from "@/db/schema";
+import { entries, feedback, paths, users } from "@/db/schema";
 import {
   createSession,
   destroySession,
@@ -9,7 +9,6 @@ import {
   hashPassword,
   verifyPassword,
 } from "@/lib/auth";
-import { slugify } from "@/lib/utils";
 
 export const formValue = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
 
@@ -65,18 +64,24 @@ export async function updateProfileForUser(
     .where(eq(users.id, userId));
 }
 
+export async function saveFeedbackForUser(userId: string, message: string) {
+  const value = message.trim();
+  if (value.length < 3) throw new Error("Please enter at least a few words of feedback.");
+  if (value.length > 2000) throw new Error("Feedback must be 2,000 characters or fewer.");
+  await db.insert(feedback).values({ id: nanoid(), userId, message: value });
+}
+
 export async function savePathForUser(
   userId: string,
-  input: { id?: string; title: string; description?: string; slug: string; isPublic: boolean },
+  input: { id?: string; title: string; description?: string; banner?: string; isPublic: boolean },
 ) {
   const title = input.title.trim();
   const description = input.description?.trim() ?? "";
-  const slug = input.id ? slugify(input.slug) : nanoid();
-  if (title.length < 2 || slug.length < 2) throw new Error("Add a title and a valid slug.");
+  if (title.length < 2) throw new Error("Add a title.");
 
   if (input.id) {
     const owned = await db
-      .select({ id: paths.id })
+      .select({ id: paths.id, slug: paths.slug })
       .from(paths)
       .where(and(eq(paths.id, input.id), eq(paths.userId, userId)))
       .limit(1);
@@ -86,24 +91,46 @@ export async function savePathForUser(
       .set({
         title,
         description: description || null,
-        slug,
+        banner: input.banner?.trim() || null,
         isPublic: input.isPublic,
         updatedAt: new Date(),
       })
       .where(eq(paths.id, input.id));
-    return input.id;
+    return { id: input.id, slug: owned[0].slug };
   }
 
   const id = nanoid();
-  await db.insert(paths).values({
-    id,
-    userId,
-    title,
-    description: description || null,
-    slug,
-    isPublic: input.isPublic,
-  });
-  return id;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const slug = nanoid(9);
+    const existing = await db
+      .select({ id: paths.id })
+      .from(paths)
+      .where(eq(paths.slug, slug))
+      .limit(1);
+    if (existing.length) continue;
+    await db.insert(paths).values({
+      id,
+      userId,
+      title,
+      description: description || null,
+      banner: input.banner?.trim() || null,
+      slug,
+      isPublic: input.isPublic,
+    });
+    return { id, slug };
+  }
+  throw new Error("Could not create a unique public URL. Please try again.");
+}
+
+export async function deletePathForUser(userId: string, pathId: string) {
+  const owned = await db
+    .select({ id: paths.id })
+    .from(paths)
+    .where(and(eq(paths.id, pathId), eq(paths.userId, userId)))
+    .limit(1);
+  if (!owned.length) throw new Error("Path not found.");
+  await db.delete(entries).where(eq(entries.pathId, pathId));
+  await db.delete(paths).where(eq(paths.id, pathId));
 }
 
 export async function saveEntryForUser(
@@ -136,6 +163,52 @@ export async function saveEntryForUser(
   const id = nanoid();
   await db.insert(entries).values({ id, pathId, userId, date, content, note: note || null });
   return id;
+}
+
+export async function deleteEntryForUser(userId: string, entryId: string) {
+  const owned = await db
+    .select({ id: entries.id })
+    .from(entries)
+    .innerJoin(paths, eq(entries.pathId, paths.id))
+    .where(and(eq(entries.id, entryId), eq(entries.userId, userId), eq(paths.userId, userId)))
+    .limit(1);
+  if (!owned.length) throw new Error("Log not found.");
+  await db.delete(entries).where(eq(entries.id, entryId));
+}
+
+export async function updateEntryForUser(
+  userId: string,
+  entryId: string,
+  input: { date: string; content: string; note?: string },
+) {
+  const date = input.date.trim();
+  const content = input.content.trim();
+  const note = input.note?.trim() ?? "";
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !content) throw new Error("Invalid log entry.");
+
+  const existing = (
+    await db
+      .select({ entry: entries, path: paths })
+      .from(entries)
+      .innerJoin(paths, eq(entries.pathId, paths.id))
+      .where(and(eq(entries.id, entryId), eq(entries.userId, userId), eq(paths.userId, userId)))
+      .limit(1)
+  )[0];
+  if (!existing) throw new Error("Log not found.");
+
+  const duplicate = await db
+    .select({ id: entries.id })
+    .from(entries)
+    .where(
+      and(eq(entries.pathId, existing.path.id), eq(entries.date, date), ne(entries.id, entryId)),
+    )
+    .limit(1);
+  if (duplicate.length) throw new Error("A log already exists for that date.");
+
+  await db
+    .update(entries)
+    .set({ date, content, note: note || null, updatedAt: new Date() })
+    .where(eq(entries.id, entryId));
 }
 
 export async function listUserPaths(userId: string) {

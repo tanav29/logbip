@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPublicProfile } from "@/../server/services";
-import { SiteHeader } from "@/components/site-header";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { calculateStats } from "@/lib/stats";
@@ -14,7 +13,6 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
   const recent = profile.entries.slice(0, 8);
   return (
     <>
-      <SiteHeader />
       <main className="mx-auto w-full max-w-5xl px-5 py-12">
         <section className="flex flex-wrap items-center gap-4">
           {profile.user.avatar ? (

@@ -1,9 +1,8 @@
-import { drizzle } from "drizzle-orm/libsql";
-import { createClient } from "@libsql/client";
-import * as schema from "./schema";
+import "dotenv/config";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 
-const client = createClient({
-  url: process.env.DATABASE_URL ?? "file:./data/logbip.db",
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL!,
 });
-
-export const db = drizzle(client, { schema });
+export const db = drizzle({ client: pool });
