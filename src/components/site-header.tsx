@@ -9,43 +9,32 @@ export async function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-xl">
       <div className="mx-auto flex min-h-16 w-full max-w-6xl flex-wrap items-center justify-between gap-2 px-5 py-2">
         <Link
-          href={user ? "/dashboard" : "/"}
-          className="group flex items-center gap-2 text-[15px] font-semibold tracking-tight"
+          href="/"
+          className="group flex items-center gap-2 text-lg font-semibold tracking-tight"
         >
           <span className="flex size-6 items-center justify-center rounded-[6px] bg-foreground text-xs text-background transition-transform group-hover:rotate-6">
             L
           </span>
-          Log<span className="text-muted-foreground">Bip</span>
+          LogBip
         </Link>
-        <nav className="flex items-center gap-1 text-sm sm:gap-2">
+        <nav className="flex items-center gap-3 text-sm">
           {user ? (
             <>
-              <Button
-                variant="ghost"
-                className="hidden sm:inline-flex"
-                render={<Link href="/dashboard" />}
-              >
+              <Link className="hidden sm:inline-flex hover:text-muted-foreground" href="/dashboard">
                 Dashboard
-              </Button>
-              <Button
-                variant="ghost"
-                className="hidden sm:inline-flex"
-                render={<Link href="/settings" />}
-              >
+              </Link>
+              <Link className="hidden sm:inline-flex hover:text-muted-foreground" href="/settings">
                 Settings
-              </Button>
-              <form action={logout}>
-                <Button variant="ghost" type="submit">
-                  Sign out
-                </Button>
-              </form>
+              </Link>
             </>
           ) : (
             <>
-              <Button variant="ghost" render={<Link href="/login" />}>
+              <Link className="hidden sm:inline-flex hover:text-muted-foreground" href="/login">
                 Sign in
-              </Button>
-              <Button render={<Link href="/register" />}>Get started</Button>
+              </Link>
+              <Link className="hidden sm:inline-flex hover:text-muted-foreground" href="/register">
+                Get started
+              </Link>
             </>
           )}
         </nav>

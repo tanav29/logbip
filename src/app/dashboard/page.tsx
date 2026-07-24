@@ -28,7 +28,6 @@ export default async function Dashboard() {
   return (
     <>
       <SiteHeader />
-      <div className="bg-gradient-glow" />
       <main className="mx-auto w-full max-w-6xl px-5 py-10 relative">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-4 border-b border-border/80 pb-8">
           <div>
@@ -41,30 +40,30 @@ export default async function Dashboard() {
           </div>
           <Button render={<Link href="/dashboard/paths/new" />}>New path</Button>
         </div>
-        <div className="mb-10 grid gap-4 sm:grid-cols-3">
-          <Stat label="Active paths" value={allPaths.length} />
-          <Stat
-            label="Current streak"
-            value={`${stats.current} day${stats.current === 1 ? "" : "s"}`}
-          />
-          <Stat
-            label="Longest streak"
-            value={`${stats.longest} day${stats.longest === 1 ? "" : "s"}`}
-          />
-        </div>
         <Card className="mb-10 p-5 glass-card">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-semibold">Activity</h2>
-            <span className="text-xs text-muted-foreground">Last 10 weeks</span>
+          <div className="flex items-center justify-around">
+            <Stat label="Active paths" value={allPaths.length} />
+            <Stat
+              label="Current streak"
+              value={`${stats.current} day${stats.current === 1 ? "" : "s"}`}
+            />
+            <Stat
+              label="Longest streak"
+              value={`${stats.longest} day${stats.longest === 1 ? "" : "s"}`}
+            />
           </div>
-          <div className="grid grid-cols-31 gap-1.5">
+          <div className="grid grid-cols-10 grid-rows-7">
             {heatmap(stats.dates).map((cell) => (
               <span
                 key={cell.date}
                 title={`${cell.date}: ${cell.count} entr${cell.count === 1 ? "y" : "ies"}`}
-                className={`aspect-square h-5 w-5 rounded-sm ${cell.count ? "bg-foreground" : "bg-muted"}`}
+                className={`aspect-square h-3 w-3 ${cell.count ? "bg-foreground" : "bg-muted"}`}
               />
             ))}
+          </div>
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold">Activity</h2>
+            <span className="text-xs text-muted-foreground">Last 10 weeks</span>
           </div>
         </Card>
         <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
@@ -76,7 +75,7 @@ export default async function Dashboard() {
             {allPaths.length ? (
               <div className="grid gap-3">
                 {allPaths.map((path) => (
-                  <Card key={path.id} className="glass-card">
+                  <div key={path.id} className="glass-card rounded">
                     <Link href={`/dashboard/paths/${path.id}`} className="block p-5">
                       <div className="flex items-start justify-between gap-4">
                         <div>
@@ -91,7 +90,7 @@ export default async function Dashboard() {
                       </div>
                       <p className="mt-4 text-xs text-muted-foreground">/{path.slug}</p>
                     </Link>
-                  </Card>
+                  </div>
                 ))}
               </div>
             ) : (
@@ -108,7 +107,7 @@ export default async function Dashboard() {
           </section>
           <section>
             <h2 className="mb-4 text-lg font-semibold">Recent activity</h2>
-            <Card>
+            <div className="glass-card">
               {recent.length ? (
                 recent.map((entry) => (
                   <div key={entry.id} className="border-b p-4 last:border-0">
@@ -121,7 +120,7 @@ export default async function Dashboard() {
                   Your completed days will appear here.
                 </p>
               )}
-            </Card>
+            </div>
           </section>
         </div>
       </main>
@@ -141,10 +140,10 @@ function heatmap(dates: string[]) {
 }
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
-    <Card className="glass-card border-none">
-      <CardContent className="p-5">
+    <Card className="glass-card border-none p-0">
+      <CardContent className="">
         <p className="text-sm text-muted-foreground">{label}</p>
-        <p className="mt-2 text-3xl font-bold tracking-tight">{value}</p>
+        <p className="text-3xl font-bold">{value}</p>
       </CardContent>
     </Card>
   );
