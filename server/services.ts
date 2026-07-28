@@ -43,9 +43,14 @@ export async function updateProfileForUser(
   const email = input.email.trim().toLowerCase();
   const xAccount = input.xAccount?.trim().replace(/^@/, "") || null;
   const avatar = input.avatar?.trim() || null;
-  if (name.length < 2 || !/^\S+@\S+\.\S+$/.test(email)) throw new Error("Enter a name and valid email address.");
-  if (avatar && !/^https?:\/\/\S+$/i.test(avatar)) throw new Error("Avatar must be a valid http(s) image URL.");
-  const existing = await prisma.user.findFirst({ where: { email, NOT: { id: userId } }, select: { id: true } });
+  if (name.length < 2 || !/^\S+@\S+\.\S+$/.test(email))
+    throw new Error("Enter a name and valid email address.");
+  if (avatar && !/^https?:\/\/\S+$/i.test(avatar))
+    throw new Error("Avatar must be a valid http(s) image URL.");
+  const existing = await prisma.user.findFirst({
+    where: { email, NOT: { id: userId } },
+    select: { id: true },
+  });
   if (existing) throw new Error("That email address is already in use.");
   await prisma.user.update({ where: { id: userId }, data: { name, email, xAccount, avatar } });
 }
@@ -57,64 +62,119 @@ export async function saveFeedbackForUser(userId: string, message: string) {
   await prisma.feedback.create({ data: { id: nanoid(), userId, message: value } });
 }
 
-export async function savePathForUser(userId: string, input: { id?: string; title: string; description?: string; banner?: string; isPublic: boolean }) {
+export async function savePathForUser(
+  userId: string,
+  input: { id?: string; title: string; description?: string; banner?: string; isPublic: boolean },
+) {
   const title = input.title.trim();
-  if (title.length < 2 || title.length > 120) throw new Error("Title must be between 2 and 120 characters.");
-  const data = { title, description: input.description?.trim() || null, banner: input.banner?.trim() || null, isPublic: input.isPublic };
+  if (title.length < 2 || title.length > 120)
+    throw new Error("Title must be between 2 and 120 characters.");
+  const data = {
+    title,
+    description: input.description?.trim() || null,
+    banner: input.banner?.trim() || null,
+    isPublic: input.isPublic,
+  };
   if (input.id) {
     const path = await prisma.path.findFirst({ where: { id: input.id, userId } });
     if (!path) throw new Error("Path not found.");
     await prisma.path.update({ where: { id: path.id }, data });
     return { id: path.id, slug: path.slug };
   }
-  const path = await prisma.path.create({ data: { id: nanoid(), userId, slug: nanoid(9), ...data } });
+  const path = await prisma.path.create({
+    data: { id: nanoid(), userId, slug: nanoid(9), ...data },
+  });
   return { id: path.id, slug: path.slug };
 }
 
 export async function deletePathForUser(userId: string, pathId: string) {
   const path = await prisma.path.findFirst({ where: { id: pathId, userId }, select: { id: true } });
   if (!path) throw new Error("Path not found.");
-  await prisma.$transaction([prisma.entry.deleteMany({ where: { pathId } }), prisma.path.delete({ where: { id: pathId } })]);
+  await prisma.$transaction([
+    prisma.entry.deleteMany({ where: { pathId } }),
+    prisma.path.delete({ where: { id: pathId } }),
+  ]);
 }
 
-export async function saveEntryForUser(userId: string, input: { pathId: string; date: string; content: string; note?: string }) {
+export async function saveEntryForUser(
+  userId: string,
+  input: { pathId: string; date: string; content: string; note?: string },
+) {
   const date = input.date.trim();
   const content = input.content.trim();
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !content || content.length > 5000) throw new Error("Invalid log entry.");
-  const path = await prisma.path.findFirst({ where: { id: input.pathId.trim(), userId }, select: { id: true } });
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !content || content.length > 5000)
+    throw new Error("Invalid log entry.");
+  const path = await prisma.path.findFirst({
+    where: { id: input.pathId.trim(), userId },
+    select: { id: true },
+  });
   if (!path) throw new Error("Path not found.");
   const entry = await prisma.entry.upsert({
     where: { pathId_date: { pathId: path.id, date } },
-    create: { id: nanoid(), pathId: path.id, userId, date, content, note: input.note?.trim() || null },
+    create: {
+      id: nanoid(),
+      pathId: path.id,
+      userId,
+      date,
+      content,
+      note: input.note?.trim() || null,
+    },
     update: { content, note: input.note?.trim() || null },
   });
   return entry.id;
 }
 
-export async function updateEntryForUser(userId: string, entryId: string, input: { date: string; content: string; note?: string }) {
+export async function updateEntryForUser(
+  userId: string,
+  entryId: string,
+  input: { date: string; content: string; note?: string },
+) {
   const date = input.date.trim();
   const content = input.content.trim();
-  const existing = await prisma.entry.findFirst({ where: { id: entryId, userId, path: { userId } } });
-  if (!existing || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !content) throw new Error("Invalid log entry.");
-  const duplicate = await prisma.entry.findFirst({ where: { pathId: existing.pathId, date, NOT: { id: entryId } } });
+  const existing = await prisma.entry.findFirst({
+    where: { id: entryId, userId, path: { userId } },
+  });
+  if (!existing || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !content)
+    throw new Error("Invalid log entry.");
+  const duplicate = await prisma.entry.findFirst({
+    where: { pathId: existing.pathId, date, NOT: { id: entryId } },
+  });
   if (duplicate) throw new Error("A log already exists for that date.");
-  await prisma.entry.update({ where: { id: entryId }, data: { date, content, note: input.note?.trim() || null } });
+  await prisma.entry.update({
+    where: { id: entryId },
+    data: { date, content, note: input.note?.trim() || null },
+  });
 }
 
 export async function deleteEntryForUser(userId: string, entryId: string) {
-  const entry = await prisma.entry.findFirst({ where: { id: entryId, userId, path: { userId } }, select: { id: true } });
+  const entry = await prisma.entry.findFirst({
+    where: { id: entryId, userId, path: { userId } },
+    select: { id: true },
+  });
   if (!entry) throw new Error("Log not found.");
   await prisma.entry.delete({ where: { id: entryId } });
 }
 
-export const listUserPaths = (userId: string) => prisma.path.findMany({ where: { userId }, orderBy: { updatedAt: "desc" } });
-export const getUserPath = (userId: string, id: string) => prisma.path.findFirst({ where: { id, userId }, include: { entries: { orderBy: { date: "asc" } } } });
-export const getPublicPath = (slug: string) => prisma.path.findFirst({ where: { slug, isPublic: true }, include: { user: true, entries: { orderBy: { date: "asc" } } } });
+export const listUserPaths = (userId: string) =>
+  prisma.path.findMany({ where: { userId }, orderBy: { updatedAt: "desc" } });
+// export const getUserPath = (userId: string, id: string) =>
+
+export const getPublicPath = (slug: string) =>
+  prisma.path.findFirst({
+    where: { slug, isPublic: true },
+    include: { user: true, entries: { orderBy: { date: "asc" } } },
+  });
 
 export async function getPublicProfile(userId: string) {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) return null;
-  const paths = await prisma.path.findMany({ where: { userId, isPublic: true }, orderBy: { updatedAt: "desc" } });
-  const entries = await prisma.entry.findMany({ where: { pathId: { in: paths.map((path) => path.id) } }, orderBy: { date: "desc" } });
+  const paths = await prisma.path.findMany({
+    where: { userId, isPublic: true },
+    orderBy: { updatedAt: "desc" },
+  });
+  const entries = await prisma.entry.findMany({
+    where: { pathId: { in: paths.map((path) => path.id) } },
+    orderBy: { date: "desc" },
+  });
   return { user, paths, entries };
 }

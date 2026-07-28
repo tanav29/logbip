@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { getCurrentUser } from "@/../server/services";
 import { logout, submitFeedback, updateProfile } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,26 +7,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 
 export default async function SettingsPage({
   searchParams,
 }: {
   searchParams: Promise<{ saved?: string; feedback?: string }>;
 }) {
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) redirect("/");
+  const user = session?.user;
   const { saved, feedback } = await searchParams;
   return (
-    <>
-      <main className="mx-auto w-full max-w-2xl px-5 py-10 sm:py-16">
-        <p className="text-sm text-muted-foreground">Account</p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight">Profile settings</h1>
-        <p className="mt-2 text-muted-foreground">
-          Keep your public identity and account details up to date.
-        </p>
+      <main className="mx-auto w-full max-w-4xl p-5">
+        <h1 className="text-2xl mt-6 font-semibold">Profile settings</h1>
         <Button
           variant="link"
-          className="mt-3 h-auto px-0"
+          className="mt-2 h-auto px-0"
           render={<Link href={`/profile/${user.id}`} target="_blank" />}
         >
           View your public profile ↗
@@ -42,8 +39,7 @@ export default async function SettingsPage({
             Thanks for sharing your feedback.
           </Badge>
         )}
-        <Card className="mt-8 p-5 sm:p-7">
-          <form action={updateProfile} className="space-y-6">
+          <form action={updateProfile} className="space-y-6 my-6">
             <div className="grid gap-5 sm:grid-cols-2">
               <Label className="grid gap-2">
                 Name
@@ -79,12 +75,10 @@ export default async function SettingsPage({
                 Use a public image URL. Your avatar is used on shared pages.
               </span>
             </Label>
-            <div className="flex justify-end border-t pt-5">
+            <div className="flex justify-end">
               <Button type="submit">Save changes</Button>
             </div>
           </form>
-        </Card>
-        <Card className="mt-8 p-5 sm:p-7">
           <h2 className="font-semibold">Share feedback</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Tell us what is working, what is confusing, or what you would like to see next.
@@ -94,12 +88,11 @@ export default async function SettingsPage({
               Your feedback
               <Textarea name="message" required minLength={3} maxLength={2000} rows={5} />
             </Label>
-            <div className="flex justify-end border-t pt-5">
+            <div className="flex justify-end">
               <Button type="submit">Send feedback</Button>
             </div>
           </form>
-        </Card>
-        <div className="mt-8 flex justify-end border-t pt-6">
+        <div className="mt-8 flex justify-end">
           <form action={logout}>
             <Button type="submit" variant="outline">
               Log out
@@ -107,6 +100,5 @@ export default async function SettingsPage({
           </form>
         </div>
       </main>
-    </>
   );
 }

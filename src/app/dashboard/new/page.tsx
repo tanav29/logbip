@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { savePath } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,15 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 
 export default function NewPath() {
   return (
-    <main className="mx-auto w-full max-w-2xl px-5 py-12">
-      <Button
-        variant="link"
-        className="h-auto px-0 text-muted-foreground"
-        render={<Link href="/dashboard" />}
-      >
-        ← Dashboard
-      </Button>
-      <h1 className="mt-6 text-3xl font-semibold tracking-tight">Create a learning path</h1>
+    <main className="mx-auto w-full max-w-4xl p-5">
+      <h1 className="mt-6 text-2xl font-semibold tracking-tight">Create a learning path</h1>
       <p className="mt-2 text-muted-foreground">
         Give your practice a home and make progress visible.
       </p>
@@ -39,8 +31,9 @@ export function PathForm({
   return (
     <form action={savePath} className="mt-8 space-y-5">
       <input type="hidden" name="id" value={initial?.id ?? ""} />
-      <div>
-        <Label htmlFor="title">Title</Label>
+
+      <Label className="grid gap-2">
+        Title
         <Input
           id="title"
           required
@@ -48,7 +41,8 @@ export function PathForm({
           defaultValue={initial?.title}
           placeholder="e.g. Learn TypeScript"
         />
-      </div>
+      </Label>
+
       {initial && (
         <div>
           <Label>Public URL</Label>
@@ -63,10 +57,8 @@ export function PathForm({
           A unique 9-character public URL will be generated automatically.
         </p>
       )}
-      <div>
-        <Label htmlFor="banner">
-          Banner URL <span className="font-normal text-muted-foreground">(optional)</span>
-        </Label>
+        <Label className="grid gap-2">
+          Banner URL (optional)
         <Input
           id="banner"
           name="banner"
@@ -74,11 +66,9 @@ export function PathForm({
           defaultValue={initial?.banner ?? ""}
           placeholder="https://…"
         />
-      </div>
-      <div>
-        <Label htmlFor="description">
-          Description <span className="font-normal text-muted-foreground">(markdown)</span>
         </Label>
+        <Label className="grid gap-2">
+          Description (markdown)
         <Textarea
           id="description"
           name="description"
@@ -86,7 +76,7 @@ export function PathForm({
           rows={4}
           placeholder="What are you working toward?"
         />
-      </div>
+        </Label>
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" name="isPublic" defaultChecked={initial?.isPublic ?? true} /> Make
         this path public

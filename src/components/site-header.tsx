@@ -30,11 +30,11 @@ export async function SiteHeader() {
             <>
               <Link
                 className="hidden text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
-                href="/login"
+                href="/auth"
               >
                 Sign in
               </Link>
-              <Button size="sm" render={<Link href="/register" />}>
+              <Button size="sm" render={<Link href="/auth" />}>
                 Get started
               </Button>
             </>

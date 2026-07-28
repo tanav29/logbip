@@ -5,21 +5,24 @@ import { prisma } from "@/lib/prisma";
 import { calculateStats } from "@/lib/stats";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function Dashboard() {
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/auth");
   const allPaths = await listUserPaths(user.id);
-  const allEntries = await prisma.entry.findMany({ where: { userId: user.id }, orderBy: { date: "desc" } });
+  const allEntries = await prisma.entry.findMany({
+    where: { userId: user.id },
+    orderBy: { date: "desc" },
+  });
   const stats = calculateStats(allEntries.map((entry) => entry.date));
   return (
     <>
       <main className="relative mx-auto w-full max-w-6xl px-5 py-10">
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-7">
-            <h1 className="mt-2 text-3xl font-semibold tracking-[-0.03em]">
-              Good to see you, {user.name.split(" ")[0]}.
-            </h1>
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.03em]">
+            Good to see you, {user.name.split(" ")[0]}.
+          </h1>
           <Button render={<Link href="/dashboard/new" />}>New path</Button>
         </div>
         <div className="mb-10 p-5">
@@ -36,13 +39,15 @@ export default async function Dashboard() {
           </div>
           <div className="mt-7 grid grid-flow-col grid-rows-7 gap-1 overflow-x-auto">
             {/*skiped the first 10 days for a reason*/}
-            {heatmap(stats.dates).slice(10).map((cell) => (
-              <span
-                key={cell.date}
-                title={`${cell.date}: ${cell.count} entr${cell.count === 1 ? "y" : "ies"}`}
-                className={`size-3 rounded-[3px] ${cell.count === 0 ? "bg-muted" : cell.count === 1 ? "bg-foreground/35" : cell.count < 3 ? "bg-foreground/65" : "bg-foreground"}`}
-              />
-            ))}
+            {heatmap(stats.dates)
+              .slice(10)
+              .map((cell) => (
+                <span
+                  key={cell.date}
+                  title={`${cell.date}: ${cell.count} entr${cell.count === 1 ? "y" : "ies"}`}
+                  className={`size-3 rounded-[3px] ${cell.count === 0 ? "bg-muted" : cell.count === 1 ? "bg-foreground/35" : cell.count < 3 ? "bg-foreground/65" : "bg-foreground"}`}
+                />
+              ))}
           </div>
           <div className="mt-3 flex items-center justify-between">
             <h2 className="font-semibold">Activity</h2>
@@ -58,22 +63,21 @@ export default async function Dashboard() {
             {allPaths.length ? (
               <div className="grid gap-3">
                 {allPaths.map((path) => (
-                  <div key={path.id} className="rounded-lg border hover:ring-2 ring-accent transition-all">
-                    <Link href={`/dashboard/paths/${path.id}`} className="block p-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <h3 className="font-semibold">{path.title}</h3>
-                          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                            {path.description?.slice(0,20) || "No description yet."}
-                          </p>
-                        </div>
-                        <Badge variant={path.isPublic ? "success" : "secondary"}>
-                          {path.isPublic ? "Public" : "Private"}
-                        </Badge>
-                      </div>
-                      <p className="mt-4 text-xs text-muted-foreground font-mono">/{path.slug}</p>
+                  <Link key={path.id} href={`/p/${path.slug}`}>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>{path.title}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                              <p className="text-sm text-muted-foreground">
+                                {path.description?.slice(0, 20) || "No description yet."}
+                              </p>
+                            <Badge variant={path.isPublic ? "success" : "secondary"}>
+                              {path.isPublic ? "Public" : "Private"}
+                            </Badge>
+                      </CardContent>
+                      </Card>
                     </Link>
-                  </div>
                 ))}
               </div>
             ) : (
@@ -110,8 +114,8 @@ function heatmap(dates: string[]) {
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="border-none p-0">
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <p className="text-3xl font-bold">{value}</p>
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className="text-3xl font-bold">{value}</p>
     </div>
   );
 }

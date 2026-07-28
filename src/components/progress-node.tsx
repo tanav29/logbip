@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ChevronUp, MoreHorizontal } from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronUp, MoreHorizontal } from "lucide-react";
 import Markdown from "react-markdown";
 import type { Entry } from "@/generated/prisma/client";
 import { Button } from "@/components/ui/button";
@@ -20,9 +20,10 @@ import { cn } from "@/lib/utils";
 type ProgressNodeProps = {
   pathId: string;
   entry: Entry;
+  admin: boolean
 };
 
-export function ProgressNode({ pathId, entry }: ProgressNodeProps) {
+export function ProgressNode({ pathId, entry, admin }: ProgressNodeProps) {
   const [more, setMore] = useState(false);
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,41 +67,42 @@ export function ProgressNode({ pathId, entry }: ProgressNodeProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex gap-3">
+      <div className="flex gap-3 items-center">
+        <CheckCircle2 className="fill-accent size-4" />
         <span className="mt-1 block text-xs font-medium text-muted-foreground">
           {new Date(entry.date).toLocaleDateString()}
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-base">{entry.content}</span>
         </span>
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button variant="ghost" size="icon-sm" />
-            }
-          ><MoreHorizontal className="h-4 w-4" /></DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setEditing(true)}>Edit log</DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={deleteLog}
-              className="text-destructive focus:text-destructive"
-            >
-              Delete log
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {admin &&
+          <DropdownMenu>
+            <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" />}>
+              <MoreHorizontal className="h-4 w-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setEditing(true)}>Edit log</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={deleteLog}
+                className="text-destructive focus:text-destructive"
+              >
+                Delete log
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>}
       </div>
       {entry.note && (
         <div className="typeset typeset-docs text-sm pr-1">
           <div className="flex items-center justify-between text-muted-foreground">
             <p className="italic text-xs">Note:</p>
-            <button className={cn("hover:text-primary transition-all", more ? "rotate-180" : "rotate-0")} onClick={() => setMore(!more)}>
+            <button
+              className={cn("hover:text-primary transition-all", more ? "rotate-180" : "rotate-0")}
+              onClick={() => setMore(!more)}
+            >
               <ChevronUp className="h-4 w-4" />
             </button>
           </div>
-          <div className="px-2">
-            {more && <Markdown>{entry.note}</Markdown>}
-          </div>
+          <div className="px-2">{more && <Markdown>{entry.note}</Markdown>}</div>
         </div>
       )}
       {error && <p className="text-sm text-destructive">{error}</p>}
