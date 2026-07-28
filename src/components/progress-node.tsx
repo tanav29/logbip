@@ -16,14 +16,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { CopyEntryImage } from "@/components/copy-entry-image";
 
 type ProgressNodeProps = {
   pathId: string;
+  pathTitle: string;
   entry: Entry;
   admin: boolean
 };
 
-export function ProgressNode({ pathId, entry, admin }: ProgressNodeProps) {
+export function ProgressNode({ pathId, pathTitle, entry, admin }: ProgressNodeProps) {
   const [more, setMore] = useState(false);
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,6 +92,7 @@ export function ProgressNode({ pathId, entry, admin }: ProgressNodeProps) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>}
+        <CopyEntryImage pathTitle={pathTitle} date={entry.date} content={entry.content} note={entry.note} />
       </div>
       {entry.note && (
         <div className="typeset typeset-docs text-sm pr-1">

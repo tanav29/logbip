@@ -2,7 +2,6 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { calculateStats } from "@/lib/stats";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -44,7 +43,7 @@ export default async function Dashboard({
         <div className="my-8 flex flex-wrap items-end justify-between gap-4">
           <div className="gap-2 flex items-center">
             <img
-              src={"https://avatar.vercel.sh/" + user?.name}
+              src={user?.image ?? "/bg.png"}
               className="w-8 h-8 rounded-full"
             />
             <p className="font-semibold">{user?.name}</p>

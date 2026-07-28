@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { calculateStats } from "@/lib/stats";
 import { today } from "@/lib/utils";
@@ -8,7 +7,7 @@ import { saveEntry } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageSquarePlus, ArrowUpRight, Pencil } from "lucide-react";
+import { MessageSquarePlus, Pencil } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -33,28 +32,22 @@ export default async function PathPage({
   const path = await prisma.path.findFirst({
     where: {
       slug,
-      OR: [
-        { isPublic: true },
-        ...(session ? [{ userId: session.user.id }] : []),
-      ],
     },
+    include: { user: true },
   });
   if (!path) notFound();
-
-  const adminObj = await prisma.user.findFirst({
-    where: { id: path.userId },
-  });
 
   const entries = await prisma.entry.findMany({
     where: {
       pathId: path.id,
     },
+    orderBy: { date: "asc" },
   });
 
-  const admin = path.userId == session?.user.id;
+  const admin = path.userId === session?.user.id;
 
   const logs = entries;
-  const stats = calculateStats(logs.map((entry: any) => entry.date));
+  const stats = calculateStats(logs.map((entry) => entry.date));
   const latest = logs.at(-1);
 
   return (
@@ -101,10 +94,10 @@ export default async function PathPage({
 
           <div className="gap-2 flex items-center">
             <img
-              src={"https://avatar.vercel.sh/" + adminObj?.name}
+              src={path.user?.image ?? undefined}
               className="w-8 h-8 rounded-full"
             />
-            <p>{adminObj?.name}</p>
+            <p>{path.user?.name}</p>
           </div>
 
           <div className="typeset typeset-docs text-muted-foreground text-sm overflow-auto">
@@ -173,6 +166,7 @@ export default async function PathPage({
               <ProgressNode
                 key={entry.id}
                 pathId={path.id}
+                pathTitle={path.title}
                 entry={entry}
                 admin={admin}
               />

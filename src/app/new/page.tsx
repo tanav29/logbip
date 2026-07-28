@@ -25,7 +25,6 @@ export function PathForm({
     description: string | null;
     banner: string | null;
     slug: string;
-    isPublic: boolean;
   };
 }) {
   return (
@@ -77,10 +76,6 @@ export function PathForm({
           placeholder="What are you working toward?"
         />
         </Label>
-      <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" name="isPublic" defaultChecked={initial?.isPublic ?? true} /> Make
-        this path public
-      </label>
       <Button type="submit">{initial ? "Save changes" : "Create path"}</Button>
     </form>
   );

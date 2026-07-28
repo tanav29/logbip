@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Check, Flame, Globe2, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Image from "next/image";
 
 const steps = [
   {
@@ -25,90 +24,31 @@ const steps = [
 export default function Home() {
   return (
     <main className="relative overflow-hidden">
-      <div className="bg-gradient-glow" />
-      <section className="relative z-10 mx-auto grid w-full max-w-6xl gap-12 px-5 pb-20 pt-20 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:pb-28 lg:pt-28">
-        <div>
-          <Badge variant="outline" className="mb-6 rounded-full px-3 py-1 text-xs font-medium">
-            Learning in public
-          </Badge>
-          <h1 className="max-w-3xl text-5xl font-semibold tracking-[-0.04em] sm:text-7xl">
+      <section className="relative w-full h-[50rem]">
+        <main className="mx-auto max-w-5xl h-full flex items-center justify-start p-5">
+          <Image src="/bg.png" alt="Abstract progress background" width={1000} height={1000} className="-z-10 absolute w-full h-full object-cover top-0 left-0 right-0 bottom-0 flex brightness-90 select-none" />
+        <div className="h-fit flex flex-col text-background">
+          <h1 className="max-w-3xl text-4xl font-semibold tracking-tight">
             Make progress
             <br />
-            <span className="gradient-text">visible.</span>
+            <span>visible.</span>
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-8 text-muted-foreground">
-            LogBip turns everyday learning into a public record you can be proud of. Keep your
-            momentum, reflect on the work, and share the path as it unfolds.
-          </p>
+
           <div className="mt-10 flex flex-wrap gap-4">
-            <Button size="lg" render={<Link href="/new" />}>
+            <Button size="lg" variant={"secondary"} render={<Link href="/new" />}>
               Start your path <ArrowRight className="ml-2 size-4" />
             </Button>
           </div>
-          <p className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
-            <Check className="size-4 text-primary" /> Free to start
-            <Check className="size-4 text-primary ml-2" /> No noisy feeds
-            <Check className="size-4 text-primary ml-2" /> Your work, your pace
+          <p className="mt-6 flex items-center gap-2 text-sm">
+            <Check className="size-4 ml-2" /> No noisy feeds
+            <Check className="size-4 ml-2" /> Your work, your pace
           </p>
-        </div>
-        <Card className="glass-card relative shadow-[0_24px_80px_-32px_rgb(0_0_0_/_0.5)]">
-          <CardHeader className="relative z-10">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                  Learning path
-                </p>
-                <CardTitle className="mt-2 text-2xl font-semibold">Build with TypeScript</CardTitle>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  A daily record of becoming a better builder.
-                </p>
-              </div>
-              <Badge variant="secondary">Public</Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="relative z-10">
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                ["12", "day streak"],
-                ["28", "days logged"],
-                ["4", "this week"],
-              ].map(([value, label]) => (
-                <div
-                  key={label}
-                  className="rounded-md border border-border bg-background p-4 text-center"
-                >
-                  <p className="text-2xl font-bold text-foreground">{value}</p>
-                  <p className="mt-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    {label}
-                  </p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-8 space-y-3">
-              {[
-                "Shipped the first typed API route",
-                "Refactored the form state",
-                "Read about discriminated unions",
-              ].map((item, index) => (
-                <div
-                  key={item}
-                  className="group flex items-center gap-4 rounded-md border border-border bg-background p-4 text-sm transition-colors hover:bg-muted"
-                >
-                  <span
-                    className={`flex size-7 shrink-0 items-center justify-center rounded-full shadow-sm transition-transform group-hover:scale-110 ${index === 0 ? "bg-primary text-primary-foreground shadow-primary/30" : "bg-muted text-muted-foreground"}`}
-                  >
-                    <Check className="size-4" />
-                  </span>
-                  <span className="font-medium">{item}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </main>
       </section>
 
       <section className="relative border-y border-border bg-muted/30">
-        <div className="relative z-10 mx-auto grid w-full max-w-6xl gap-6 px-5 py-20 md:grid-cols-3">
+        <div className="relative z-10 mx-auto h-[30rem] grid items-center w-full max-w-6xl gap-6 px-5 py-20 md:grid-cols-3">
           {steps.map(({ icon: Icon, title, text }) => (
             <div key={title} className="glass-card rounded-lg p-7">
               <div className="flex size-10 items-center justify-center rounded-md bg-muted text-foreground">
