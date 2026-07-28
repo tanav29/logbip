@@ -1,96 +1,150 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getPublicProfile } from "@/../server/services";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { prisma } from "@/lib/prisma";
 import { calculateStats } from "@/lib/stats";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { notFound } from "next/navigation";
 
-export default async function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function Dashboard({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
-  const profile = await getPublicProfile(id);
-  if (!profile) notFound();
-  const stats = calculateStats(profile.entries.map((entry) => entry.date));
-  const recent = profile.entries.slice(0, 8);
+  const user = await prisma.user.findUnique({
+    where: { id },
+  });
+  if (!user) notFound();
+
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  const admin = session && id == session?.user.id;
+
+  let paths;
+
+  if (admin) {
+    paths = await prisma.path.findMany({
+      where: { userId: id },
+      orderBy: { updatedAt: "desc" },
+    });
+  } else {
+    paths = await prisma.path.findMany({
+      where: { userId: id, isPublic: true },
+      orderBy: { updatedAt: "desc" },
+    });
+  }
+
+  const allEntries = await prisma.entry.findMany({
+    where: { userId: id },
+    orderBy: { date: "desc" },
+  });
+
+  const stats = calculateStats(allEntries.map((entry) => entry.date));
   return (
     <>
-      <main className="mx-auto w-full max-w-5xl px-5 py-12">
-        <section className="flex flex-wrap items-center gap-4">
-          {profile.user.avatar ? (
-            <span
-              className="size-16 rounded-full border bg-cover bg-center"
-              style={{ backgroundImage: `url(${profile.user.avatar})` }}
-              role="img"
-              aria-label={`${profile.user.name}'s avatar`}
-            />
-          ) : (
-            <span className="flex size-16 items-center justify-center rounded-full bg-muted text-xl font-semibold">
-              {profile.user.name.slice(0, 1).toUpperCase()}
-            </span>
-          )}
-          <div>
-            <p className="text-sm text-muted-foreground">Public profile</p>
-            <h1 className="text-3xl font-bold tracking-tight">{profile.user.name}</h1>
-            {profile.user.xAccount && (
-              <p className="mt-1 text-sm text-muted-foreground">@{profile.user.xAccount}</p>
-            )}
-          </div>
-        </section>
-        <div className="mt-8 grid gap-3 sm:grid-cols-4">
-          <Stat label="Public goals" value={profile.paths.length} />
-          <Stat label="Days completed" value={stats.total} />
-          <Stat label="Current streak" value={stats.current} />
-          <Stat label="Longest streak" value={stats.longest} />
+      <main className="relative mx-auto w-full max-w-4xl p-5">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.03em]">
+            Good to see you, {user.name.split(" ")[0]}.
+          </h1>
+          <Button render={<Link href="/new" />}>New path</Button>
         </div>
-        <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_360px]">
-          <section>
-            <h2 className="mb-4 text-lg font-semibold">Public goals</h2>
+        <div className="mb-10">
+          <div className="grid grid-cols-3 divide-x divide-border">
+            <Stat label="Active paths" value={paths.length} />
+            <Stat
+              label="Current streak"
+              value={`${stats.current} day${stats.current === 1 ? "" : "s"}`}
+            />
+            <Stat
+              label="Longest streak"
+              value={`${stats.longest} day${stats.longest === 1 ? "" : "s"}`}
+            />
+          </div>
+          <div className="mt-7 grid grid-flow-col grid-rows-7 gap-1 overflow-x-auto">
+            {/*skiped the first 10 days for a reason*/}
+            {heatmap(stats.dates)
+              .slice(10)
+              .map((cell) => (
+                <span
+                  key={cell.date}
+                  title={`${cell.date}: ${cell.count} entr${cell.count === 1 ? "y" : "ies"}`}
+                  className={`size-3 rounded-[3px] ${cell.count === 0 ? "bg-muted" : cell.count === 1 ? "bg-foreground/35" : cell.count < 3 ? "bg-foreground/65" : "bg-foreground"}`}
+                />
+              ))}
+          </div>
+          <div className="mt-3 flex items-center justify-between">
+            <h2 className="font-semibold">Activity</h2>
+            <span className="text-xs text-muted-foreground">Last year</span>
+          </div>
+        </div>
+
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Your paths</h2>
+            <span className="text-sm text-muted-foreground">
+              {paths.length} total
+            </span>
+          </div>
+          {paths.length ? (
             <div className="grid gap-3">
-              {profile.paths.map((path) => (
-                <Card
-                  key={path.id}
-                  className="p-5 transition hover:-translate-y-0.5 hover:shadow-sm"
-                >
-                  <Link href={`/${path.slug}`} className="block">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <h3 className="font-semibold">{path.title}</h3>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          {path.description || "A public learning goal."}
-                        </p>
-                      </div>
-                      <Badge variant="success">Public</Badge>
-                    </div>
-                  </Link>
-                </Card>
+              {paths.map((path) => (
+                <Link key={path.id} href={`/p/${path.slug}`}>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>{path.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground">
+                        {path.description?.slice(0, 20) ||
+                          "No description yet."}
+                      </p>
+                      <Badge variant={path.isPublic ? "success" : "secondary"}>
+                        {path.isPublic ? "Public" : "Private"}
+                      </Badge>
+                    </CardContent>
+                  </Card>
+                </Link>
               ))}
             </div>
-          </section>
-          <section>
-            <h2 className="mb-4 text-lg font-semibold">Recent activity</h2>
-            <Card>
-              {recent.length ? (
-                recent.map((entry) => (
-                  <div key={entry.id} className="border-b p-4 last:border-0">
-                    <p className="text-xs text-muted-foreground">{entry.date}</p>
-                    <p className="mt-1 text-sm">{entry.content}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="p-6 text-sm text-muted-foreground">No public activity yet.</p>
-              )}
-            </Card>
-          </section>
-        </div>
+          ) : (
+            <div className="rounded-xl border border-dashed p-10 text-center">
+              <p className="font-medium">Your first path starts here.</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Create a small, specific learning goal.
+              </p>
+              <Button variant="link" render={<Link href="/dashboard/new" />}>
+                Create a path
+              </Button>
+            </div>
+          )}
+        </section>
       </main>
     </>
   );
 }
-
-function Stat({ label, value }: { label: string; value: number }) {
+function heatmap(dates: string[]) {
+  const counts = new Map<string, number>();
+  dates.forEach((date) => counts.set(date, (counts.get(date) ?? 0) + 1));
+  const end = new Date();
+  end.setUTCHours(0, 0, 0, 0);
+  const start = new Date(end);
+  start.setUTCDate(start.getUTCDate() - 364);
+  return Array.from({ length: 365 }, (_, index) => {
+    const dateValue = new Date(start);
+    dateValue.setUTCDate(start.getUTCDate() + index);
+    const date = dateValue.toISOString().slice(0, 10);
+    return { date, count: counts.get(date) ?? 0 };
+  });
+}
+function Stat({ label, value }: { label: string; value: string | number }) {
   return (
-    <Card className="p-4">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 text-xl font-semibold">{value}</p>
-    </Card>
+    <div className="border-none p-0">
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className="text-3xl font-bold">{value}</p>
+    </div>
   );
 }

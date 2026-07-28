@@ -28,7 +28,7 @@ export default function RootLayout({
       className={cn(
         "h-full",
         "antialiased",
-        "dark",
+        "light",
         geistMono.variable,
         "font-sans",
         geist.variable,
