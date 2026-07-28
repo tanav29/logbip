@@ -56,6 +56,7 @@ app.post("/auth/logout", async (c) => {
   return c.json({ ok: true });
 });
 
+
 app.use("/paths/*", async (c, next) => {
   const user = await getCurrentUser();
   if (!user) return c.json({ error: "Unauthorized" }, 401);

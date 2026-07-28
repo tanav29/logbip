@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser } from "@/../server/services";
 import { logout, submitFeedback, updateProfile } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";

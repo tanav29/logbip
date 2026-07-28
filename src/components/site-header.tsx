@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser } from "@/../server/services";
 import { Button } from "@/components/ui/button";
 
 export async function SiteHeader() {

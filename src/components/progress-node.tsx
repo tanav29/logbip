@@ -2,8 +2,7 @@
 
 import { ChevronDown, ChevronUp, MoreHorizontal } from "lucide-react";
 import Markdown from "react-markdown";
-import type { InferSelectModel } from "drizzle-orm";
-import { entries } from "@/db/schema";
+import type { Entry } from "@/generated/prisma/client";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -19,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 type ProgressNodeProps = {
   pathId: string;
-  entry: InferSelectModel<typeof entries>;
+  entry: Entry;
 };
 
 export function ProgressNode({ pathId, entry }: ProgressNodeProps) {

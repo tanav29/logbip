@@ -4,7 +4,15 @@ LogBip is a learning-in-public app: create focused paths, log progress by date, 
 
 ## Local setup
 
-Requires Node 20+ and Bun (or npm). Configure `DATABASE_URL` in `.env` (the default is `file:./data/logbip.db`), then:
+Requires Node 20+ and Bun (or npm). Configure PostgreSQL plus Better Auth in `.env`:
+
+```env
+DATABASE_URL="postgresql://..."
+BETTER_AUTH_SECRET="a-long-random-secret-at-least-32-characters"
+BETTER_AUTH_URL="http://localhost:3000"
+```
+
+Then run:
 
 ```bash
 bun install
@@ -24,7 +32,7 @@ bun run build
 
 ## Deployment
 
-Deploy the Next.js app to Vercel or another Node-compatible host. Configure `DATABASE_URL` in the deployment environment and run `bun run db:migrate` against that database. No live deployment URL is configured in this repository yet.
+Deploy the Next.js app to Vercel or another Node-compatible host. Configure `DATABASE_URL`, `BETTER_AUTH_SECRET`, and `BETTER_AUTH_URL` in the deployment environment, then run `bun run db:migrate` against the target database. No live deployment URL is configured in this repository yet.
 
 ## Demo walkthrough
 

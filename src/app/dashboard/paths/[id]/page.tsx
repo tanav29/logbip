@@ -1,9 +1,6 @@
 import Link from "next/link";
-import { and, asc, eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
-import { db } from "@/db";
-import { entries, paths } from "@/db/schema";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, getUserPath } from "@/../server/services";
 import { calculateStats } from "@/lib/stats";
 import { today } from "@/lib/utils";
 import { ProgressNode } from "@/components/progress-node";
@@ -26,19 +23,10 @@ export default async function PathPage({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  const path = (
-    await db
-      .select()
-      .from(paths)
-      .where(and(eq(paths.id, id), eq(paths.userId, user.id)))
-      .limit(1)
-  )[0];
+  const result = await getUserPath(user.id, id);
+  const path = result;
   if (!path) notFound();
-  const logs = await db
-    .select()
-    .from(entries)
-    .where(eq(entries.pathId, path.id))
-    .orderBy(asc(entries.date));
+  const logs = path.entries;
   const stats = calculateStats(logs.map((entry) => entry.date));
   const latest = logs.at(-1);
 

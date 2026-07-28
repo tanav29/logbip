@@ -1,9 +1,7 @@
 import Link from "next/link";
-import { desc, eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
-import { db } from "@/db";
-import { entries, paths } from "@/db/schema";
+import { getCurrentUser, listUserPaths } from "@/../server/services";
+import { prisma } from "@/lib/prisma";
 import { calculateStats } from "@/lib/stats";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,16 +10,8 @@ import { Card, CardContent } from "@/components/ui/card";
 export default async function Dashboard() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  const allPaths = await db
-    .select()
-    .from(paths)
-    .where(eq(paths.userId, user.id))
-    .orderBy(desc(paths.updatedAt));
-  const allEntries = await db
-    .select()
-    .from(entries)
-    .where(eq(entries.userId, user.id))
-    .orderBy(desc(entries.date));
+  const allPaths = await listUserPaths(user.id);
+  const allEntries = await prisma.entry.findMany({ where: { userId: user.id }, orderBy: { date: "desc" } });
   const recent = allEntries.slice(0, 8);
   const stats = calculateStats(allEntries.map((entry) => entry.date));
   return (

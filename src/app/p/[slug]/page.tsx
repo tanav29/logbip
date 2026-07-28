@@ -1,26 +1,14 @@
-import { asc, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
-import { db } from "@/db";
-import { entries, paths, users } from "@/db/schema";
+import { getPublicPath } from "@/../server/services";
 import { calculateStats } from "@/lib/stats";
 import { CopyLink } from "@/components/copy-link";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 export default async function PublicPath({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const result = await db
-    .select({ path: paths, user: users })
-    .from(paths)
-    .innerJoin(users, eq(paths.userId, users.id))
-    .where(eq(paths.slug, slug))
-    .limit(1);
-  const record = result[0];
-  if (!record || !record.path.isPublic) notFound();
-  const logs = await db
-    .select()
-    .from(entries)
-    .where(eq(entries.pathId, record.path.id))
-    .orderBy(asc(entries.date));
+  const record = await getPublicPath(slug);
+  if (!record) notFound();
+  const logs = record.entries;
   const stats = calculateStats(logs.map((entry) => entry.date));
   return (
     <>
@@ -47,12 +35,12 @@ export default async function PublicPath({ params }: { params: Promise<{ slug: s
                 {record.user.name}&apos;s learning path
               </Link>
             </div>
-            <h1 className="mt-2 text-4xl font-bold tracking-tight">{record.path.title}</h1>
+            <h1 className="mt-2 text-4xl font-bold tracking-tight">{record.title}</h1>
             <p className="mt-3 max-w-xl text-lg text-muted-foreground">
-              {record.path.description || "A public record of steady progress."}
+              {record.description || "A public record of steady progress."}
             </p>
           </div>
-          <CopyLink slug={record.path.slug} />
+          <CopyLink slug={record.slug} />
         </div>
         <div className="mt-10 grid grid-cols-3 gap-3">
           <Stat label="Current streak" value={stats.current} />
