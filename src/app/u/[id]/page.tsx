@@ -23,22 +23,15 @@ export default async function Dashboard({
 
   const admin = session && id == session?.user.id;
 
-  let paths;
-
-  if (admin) {
-    paths = await prisma.path.findMany({
+  const paths = await prisma.path.findMany({
       where: { userId: id },
       orderBy: { updatedAt: "desc" },
     });
-  } else {
-    paths = await prisma.path.findMany({
-      where: { userId: id, isPublic: true },
-      orderBy: { updatedAt: "desc" },
-    });
-  }
 
   const allEntries = await prisma.entry.findMany({
-    where: { userId: id },
+    where: {
+      userId: id,
+    },
     orderBy: { date: "desc" },
   });
 
@@ -46,11 +39,17 @@ export default async function Dashboard({
   return (
     <>
       <main className="relative mx-auto w-full max-w-4xl p-5">
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.03em]">
-            Good to see you, {user.name.split(" ")[0]}.
-          </h1>
-          <Button render={<Link href="/new" />}>New path</Button>
+        <img className="select-none aspect-3/1 w-full rounded-2xl object-cover border shadow-lg" src="https://i0.wp.com/modernstoicism.com/wp-content/uploads/2025/11/1024px-Vanitas-Still_Life_Oosterwijck.jpg?resize=768%2C635" />
+
+        <div className="my-8 flex flex-wrap items-end justify-between gap-4">
+          <div className="gap-2 flex items-center">
+            <img
+              src={"https://avatar.vercel.sh/" + user?.name}
+              className="w-8 h-8 rounded-full"
+            />
+            <p className="font-semibold">{user?.name}</p>
+          </div>
+          {admin && <Button render={<Link href="/new" />}>New path</Button>}
         </div>
         <div className="mb-10">
           <div className="grid grid-cols-3 divide-x divide-border">
@@ -102,9 +101,6 @@ export default async function Dashboard({
                         {path.description?.slice(0, 20) ||
                           "No description yet."}
                       </p>
-                      <Badge variant={path.isPublic ? "success" : "secondary"}>
-                        {path.isPublic ? "Public" : "Private"}
-                      </Badge>
                     </CardContent>
                   </Card>
                 </Link>
@@ -116,9 +112,10 @@ export default async function Dashboard({
               <p className="mt-1 text-sm text-muted-foreground">
                 Create a small, specific learning goal.
               </p>
-              <Button variant="link" render={<Link href="/dashboard/new" />}>
+              {admin &&
+              <Button variant="link" render={<Link href="/new" />}>
                 Create a path
-              </Button>
+              </Button>}
             </div>
           )}
         </section>

@@ -157,7 +157,12 @@ export async function deleteEntryForUser(userId: string, entryId: string) {
 
 export const listUserPaths = (userId: string) =>
   prisma.path.findMany({ where: { userId }, orderBy: { updatedAt: "desc" } });
-// export const getUserPath = (userId: string, id: string) =>
+
+export const getUserPath = (userId: string, id: string) =>
+  prisma.path.findFirst({
+    where: { id, userId },
+    include: { entries: { orderBy: { date: "asc" } } },
+  });
 
 export const getPublicPath = (slug: string) =>
   prisma.path.findFirst({

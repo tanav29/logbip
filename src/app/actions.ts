@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/prisma";
 import {
   destroySession,
   deleteEntryForUser,
@@ -17,17 +18,17 @@ import {
 } from "@/../server/services";
 
 export async function register(form: FormData) {
-  await registerUser(
+  const result = await registerUser(
     formValue(form, "name"),
     formValue(form, "email"),
     formValue(form, "password"),
   );
-  redirect("/dashboard");
+  redirect(`/u/${result.id}`);
 }
 
 export async function login(form: FormData) {
-  await loginUser(formValue(form, "email"), formValue(form, "password"));
-  redirect("/dashboard");
+  const result = await loginUser(formValue(form, "email"), formValue(form, "password"));
+  redirect(`/u/${result.id}`);
 }
 
 export async function logout() {
@@ -45,10 +46,9 @@ export async function savePath(form: FormData) {
     banner: formValue(form, "banner"),
     isPublic: form.get("isPublic") === "on",
   });
-  revalidatePath("/dashboard");
-  revalidatePath(`/dashboard/paths/${result.id}`);
-  revalidatePath(`/${result.slug}`);
-  redirect(`/dashboard/paths/${result.id}`);
+  revalidatePath(`/u/${user.id}`);
+  revalidatePath(`/p/${result.slug}`);
+  redirect(`/p/${result.slug}`);
 }
 
 export async function deletePath(form: FormData) {
@@ -56,8 +56,8 @@ export async function deletePath(form: FormData) {
   if (!user) throw new Error("Unauthorized");
   const id = formValue(form, "id");
   await deletePathForUser(user.id, id);
-  revalidatePath("/dashboard");
-  redirect("/dashboard");
+  revalidatePath(`/u/${user.id}`);
+  redirect(`/u/${user.id}`);
 }
 
 export async function saveEntry(form: FormData) {
@@ -70,8 +70,9 @@ export async function saveEntry(form: FormData) {
     content: formValue(form, "content"),
     note: formValue(form, "note"),
   });
-  revalidatePath(`/dashboard/paths/${pathId}`);
-  revalidatePath("/dashboard");
+  const path = await prisma.path.findFirst({ where: { id: pathId, userId: user.id }, select: { slug: true } });
+  if (path) revalidatePath(`/p/${path.slug}`);
+  revalidatePath(`/u/${user.id}`);
 }
 
 export async function deleteEntry(form: FormData) {
@@ -79,8 +80,9 @@ export async function deleteEntry(form: FormData) {
   if (!user) throw new Error("Unauthorized");
   const pathId = formValue(form, "pathId");
   await deleteEntryForUser(user.id, formValue(form, "id"));
-  revalidatePath(`/dashboard/paths/${pathId}`);
-  revalidatePath("/dashboard");
+  const path = await prisma.path.findFirst({ where: { id: pathId, userId: user.id }, select: { slug: true } });
+  if (path) revalidatePath(`/p/${path.slug}`);
+  revalidatePath(`/u/${user.id}`);
 }
 
 export async function updateProfile(form: FormData) {
@@ -93,7 +95,7 @@ export async function updateProfile(form: FormData) {
     avatar: formValue(form, "avatar"),
   });
   revalidatePath("/settings");
-  revalidatePath("/dashboard");
+  revalidatePath(`/u/${user.id}`);
   redirect("/settings?saved=1");
 }
 

@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { logout, submitFeedback, updateProfile } from "@/app/actions";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +24,7 @@ export default async function SettingsPage({
         <Button
           variant="link"
           className="mt-2 h-auto px-0"
-          render={<Link href={`/profile/${user.id}`} target="_blank" />}
+          render={<Link href={`/u/${user.id}`} target="_blank" />}
         >
           View your public profile ↗
         </Button>

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { calculateStats } from "@/lib/stats";
 import { today } from "@/lib/utils";
 import { ProgressNode } from "@/components/progress-node";
-import { PathForm } from "../../dashboard/new/page";
+import { PathForm } from "../../new/page";
 import { saveEntry } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,7 +31,13 @@ export default async function PathPage({
     headers: await headers(),
   });
   const path = await prisma.path.findFirst({
-    where: { slug },
+    where: {
+      slug,
+      OR: [
+        { isPublic: true },
+        ...(session ? [{ userId: session.user.id }] : []),
+      ],
+    },
   });
   if (!path) notFound();
 
@@ -54,10 +60,17 @@ export default async function PathPage({
   return (
     <main className="mx-auto w-full max-w-6xl p-5 flex gap-6">
       <main className="max-w-[35vw] flex flex-col">
-        <img
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSq57t_1zl75cDwpuWWMbwHC0IfzkVXMn49MH4q1X1NCQ&s=10"
-          className="w-full object-cover aspect-4/3 rounded-xl bg-accent-foreground"
-        />
+        {
+          path.banner ?
+          <img
+            src={path.banner}
+            className="w-full object-cover aspect-4/3 rounded-xl bg-accent-foreground"
+          /> : (
+          <div className="w-full aspect-4/3 rounded-xl bg-accent-foreground flex items-center justify-center">
+            no banner
+          </div>
+        )
+        }
         <div className="mt-6 flex gap-3">
           <Stat label="Current streak" value={stats.current} />
           <Stat label="Longest streak" value={stats.longest} />
@@ -71,13 +84,6 @@ export default async function PathPage({
             </h1>
 
             {admin && (
-              <>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  render={<Link href={`/${path.slug}`} target="_blank" />}>
-                  <ArrowUpRight />
-                </Button>
                 <Dialog>
                   <DialogTrigger
                     render={<Button size={"icon"} variant={"outline"} />}>
@@ -90,7 +96,6 @@ export default async function PathPage({
                     <PathForm initial={path} />
                   </DialogContent>
                 </Dialog>
-              </>
             )}
           </div>
 

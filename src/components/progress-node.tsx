@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, ChevronDown, ChevronUp, MoreHorizontal } from "lucide-react";
+import { CheckCircle2, ChevronUp, MoreHorizontal } from "lucide-react";
 import Markdown from "react-markdown";
 import type { Entry } from "@/generated/prisma/client";
 import { Button } from "@/components/ui/button";

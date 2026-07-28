@@ -41,7 +41,7 @@ export default function Home() {
             momentum, reflect on the work, and share the path as it unfolds.
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
-            <Button size="lg" render={<Link href="/dashboard" />}>
+            <Button size="lg" render={<Link href="/new" />}>
               Start your path <ArrowRight className="ml-2 size-4" />
             </Button>
           </div>
@@ -130,7 +130,7 @@ export default function Home() {
             Start a path today and let the record grow with you.
           </p>
         </div>
-        <Button size="lg" render={<Link href="/dashboard" />}>
+        <Button size="lg" render={<Link href="/new" />}>
           Create an account <ArrowRight className="ml-2" />
         </Button>
       </section>
