@@ -10,7 +10,11 @@ Requires Node 20+ and Bun (or npm). Configure PostgreSQL plus Better Auth in `.e
 DATABASE_URL="postgresql://..."
 BETTER_AUTH_SECRET="a-long-random-secret-at-least-32-characters"
 BETTER_AUTH_URL="http://localhost:3000"
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
 ```
+
+For Google OAuth, add `http://localhost:3000/api/auth/callback/google` as an authorized redirect URI in Google Cloud Console. Add the equivalent HTTPS callback URL for production.
 
 Then run:
 

@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 type ProgressNodeProps = {
   pathId: string;
@@ -75,11 +76,9 @@ export function ProgressNode({ pathId, entry }: ProgressNodeProps) {
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
-              <Button variant="ghost" size="icon-sm">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
+              <Button variant="ghost" size="icon-sm" />
             }
-          />
+          ><MoreHorizontal className="h-4 w-4" /></DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => setEditing(true)}>Edit log</DropdownMenuItem>
             <DropdownMenuItem
@@ -92,14 +91,16 @@ export function ProgressNode({ pathId, entry }: ProgressNodeProps) {
         </DropdownMenu>
       </div>
       {entry.note && (
-        <div className="typeset typeset-docs text-sm">
+        <div className="typeset typeset-docs text-sm pr-1">
           <div className="flex items-center justify-between text-muted-foreground">
-            <p className="italic">Note:</p>
-            <Button variant={"ghost"} size="icon-sm" onClick={() => setMore(!more)}>
-              {more ? <ChevronUp /> : <ChevronDown />}
-            </Button>
+            <p className="italic text-xs">Note:</p>
+            <button className={cn("hover:text-primary transition-all", more ? "rotate-180" : "rotate-0")} onClick={() => setMore(!more)}>
+              <ChevronUp className="h-4 w-4" />
+            </button>
           </div>
-          {more && <Markdown>{entry.note}</Markdown>}
+          <div className="px-2">
+            {more && <Markdown>{entry.note}</Markdown>}
+          </div>
         </div>
       )}
       {error && <p className="text-sm text-destructive">{error}</p>}

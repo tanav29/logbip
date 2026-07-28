@@ -12,23 +12,17 @@ export default async function Dashboard() {
   if (!user) redirect("/login");
   const allPaths = await listUserPaths(user.id);
   const allEntries = await prisma.entry.findMany({ where: { userId: user.id }, orderBy: { date: "desc" } });
-  const recent = allEntries.slice(0, 8);
   const stats = calculateStats(allEntries.map((entry) => entry.date));
   return (
     <>
       <main className="relative mx-auto w-full max-w-6xl px-5 py-10">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-7">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              Your learning workspace
-            </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-[-0.03em]">
               Good to see you, {user.name.split(" ")[0]}.
             </h1>
-          </div>
           <Button render={<Link href="/dashboard/new" />}>New path</Button>
         </div>
-        <Card className="glass-card mb-10 p-5">
+        <div className="mb-10 p-5">
           <div className="grid grid-cols-3 divide-x divide-border">
             <Stat label="Active paths" value={allPaths.length} />
             <Stat
@@ -41,7 +35,8 @@ export default async function Dashboard() {
             />
           </div>
           <div className="mt-7 grid grid-flow-col grid-rows-7 gap-1 overflow-x-auto">
-            {heatmap(stats.dates).map((cell) => (
+            {/*skiped the first 10 days for a reason*/}
+            {heatmap(stats.dates).slice(10).map((cell) => (
               <span
                 key={cell.date}
                 title={`${cell.date}: ${cell.count} entr${cell.count === 1 ? "y" : "ies"}`}
@@ -53,8 +48,8 @@ export default async function Dashboard() {
             <h2 className="font-semibold">Activity</h2>
             <span className="text-xs text-muted-foreground">Last year</span>
           </div>
-        </Card>
-        <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
+        </div>
+        <div className="px-5">
           <section>
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Your paths</h2>
@@ -63,20 +58,20 @@ export default async function Dashboard() {
             {allPaths.length ? (
               <div className="grid gap-3">
                 {allPaths.map((path) => (
-                  <div key={path.id} className="glass-card rounded">
-                    <Link href={`/dashboard/paths/${path.id}`} className="block p-5">
+                  <div key={path.id} className="rounded-lg border hover:ring-2 ring-accent transition-all">
+                    <Link href={`/dashboard/paths/${path.id}`} className="block p-4">
                       <div className="flex items-start justify-between gap-4">
                         <div>
                           <h3 className="font-semibold">{path.title}</h3>
                           <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                            {path.description || "No description yet."}
+                            {path.description?.slice(0,20) || "No description yet."}
                           </p>
                         </div>
                         <Badge variant={path.isPublic ? "success" : "secondary"}>
                           {path.isPublic ? "Public" : "Private"}
                         </Badge>
                       </div>
-                      <p className="mt-4 text-xs text-muted-foreground">/{path.slug}</p>
+                      <p className="mt-4 text-xs text-muted-foreground font-mono">/{path.slug}</p>
                     </Link>
                   </div>
                 ))}
@@ -92,23 +87,6 @@ export default async function Dashboard() {
                 </Button>
               </div>
             )}
-          </section>
-          <section>
-            <h2 className="mb-4 text-lg font-semibold">Recent activity</h2>
-            <div className="glass-card">
-              {recent.length ? (
-                recent.map((entry) => (
-                  <div key={entry.id} className="border-b p-4 last:border-0">
-                    <p className="text-xs text-muted-foreground">{entry.date}</p>
-                    <p className="mt-1 text-sm">{entry.content}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="p-6 text-sm text-muted-foreground">
-                  Your completed days will appear here.
-                </p>
-              )}
-            </div>
           </section>
         </div>
       </main>
@@ -131,11 +109,9 @@ function heatmap(dates: string[]) {
 }
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
-    <Card className="glass-card border-none p-0">
-      <CardContent className="">
+    <div className="border-none p-0">
         <p className="text-sm text-muted-foreground">{label}</p>
         <p className="text-3xl font-bold">{value}</p>
-      </CardContent>
-    </Card>
+    </div>
   );
 }
