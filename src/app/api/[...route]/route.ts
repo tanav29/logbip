@@ -4,6 +4,7 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { handle } from 'hono/vercel'
 import { prisma } from "@/lib/prisma";
+import { isEntryOlderThanADay } from "@/lib/utils";
 import type { Context } from "hono";
 
 const app = new Hono().basePath('/api')
@@ -32,6 +33,7 @@ app.patch("/paths/:pathId/entries/:entryId", async (c) => {
     return c.json({ error: "Invalid log entry." }, 400);
   const entry = await prisma.entry.findFirst({ where: { id: c.req.param("entryId"), pathId: c.req.param("pathId"), userId: user.id } });
   if (!entry) return c.json({ error: "Log not found." }, 404);
+  if (isEntryOlderThanADay(entry.date)) return c.json({ error: "Cannot edit logs older than a day." }, 400);
   const duplicate = await prisma.entry.findFirst({ where: { pathId: entry.pathId, date, NOT: { id: entry.id } }, select: { id: true } });
   if (duplicate) return c.json({ error: "A log already exists for that date." }, 400);
   await prisma.entry.update({ where: { id: entry.id }, data: { date, content, note: String(body.note ?? "").trim() || null } });

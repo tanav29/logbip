@@ -12,10 +12,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
+import { cn, isEntryOlderThanADay } from "@/lib/utils";
 import { CopyEntryImage } from "@/components/copy-entry-image";
 
 type ProgressNodeProps = {
@@ -28,13 +29,12 @@ type ProgressNodeProps = {
 export function ProgressNode({ pathId, pathTitle, entry, admin }: ProgressNodeProps) {
   const [more, setMore] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const router = useRouter();
 
   async function updateLog(form: FormData) {
     setSaving(true);
-    setError(null);
+
     const response = await fetch(`/api/paths/${pathId}/entries/${entry.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -44,24 +44,25 @@ export function ProgressNode({ pathId, pathTitle, entry, admin }: ProgressNodePr
         note: form.get("note"),
       }),
     });
-    const result = await response.json().catch(() => ({}));
+    const _result = await response.json().catch(() => ({}));
     if (!response.ok) {
-      setError(result.error ?? "Unable to update log.");
       setSaving(false);
+      toast.error(_result.error ?? "Unable to update log.");
       return;
     }
     setSaving(false);
     setEditing(false);
     router.refresh();
+    toast.success("Log updated.");
   }
 
   async function deleteLog() {
     if (!window.confirm("Delete this log? This cannot be undone.")) return;
-    setError(null);
+
     const response = await fetch(`/api/paths/${pathId}/entries/${entry.id}`, { method: "DELETE" });
-    const result = await response.json().catch(() => ({}));
+    const _result = await response.json().catch(() => ({}));
     if (!response.ok) {
-      setError(result.error ?? "Unable to delete log.");
+      // Error handled by toast
       return;
     }
     router.refresh();
@@ -69,9 +70,9 @@ export function ProgressNode({ pathId, pathTitle, entry, admin }: ProgressNodePr
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex gap-3 items-center">
+      <div className="flex gap-3 items-center px-1 py-1">
         <CheckCircle2 className="fill-accent size-4" />
-        <span className="mt-1 block text-xs font-medium text-muted-foreground">
+        <span className="block text-xs font-medium text-muted-foreground">
           {new Date(entry.date).toLocaleDateString()}
         </span>
         <span className="min-w-0 flex-1">
@@ -83,7 +84,7 @@ export function ProgressNode({ pathId, pathTitle, entry, admin }: ProgressNodePr
               <MoreHorizontal className="h-4 w-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setEditing(true)}>Edit log</DropdownMenuItem>
+              {!isEntryOlderThanADay(entry.date) && <DropdownMenuItem onClick={() => setEditing(true)}>Edit log</DropdownMenuItem>}
               <DropdownMenuItem
                 onClick={deleteLog}
                 className="text-destructive focus:text-destructive"
@@ -99,7 +100,7 @@ export function ProgressNode({ pathId, pathTitle, entry, admin }: ProgressNodePr
           <div className="flex items-center justify-between text-muted-foreground">
             <p className="italic text-xs">Note:</p>
             <button
-              className={cn("hover:text-primary transition-all", more ? "rotate-180" : "rotate-0")}
+              className={cn("hover:text-primary transition-all duration-200", more ? "rotate-180" : "rotate-0")}
               onClick={() => setMore(!more)}
             >
               <ChevronUp className="h-4 w-4" />
@@ -108,7 +109,7 @@ export function ProgressNode({ pathId, pathTitle, entry, admin }: ProgressNodePr
           <div className="px-2">{more && <Markdown>{entry.note}</Markdown>}</div>
         </div>
       )}
-      {error && <p className="text-sm text-destructive">{error}</p>}
+
       <Dialog open={editing} onOpenChange={setEditing}>
         <DialogContent>
           <DialogHeader>

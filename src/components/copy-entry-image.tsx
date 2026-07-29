@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Image as ImageIcon } from "lucide-react";
+import { Check, Copy } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 export function CopyEntryImage({
@@ -44,13 +45,14 @@ export function CopyEntryImage({
     const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
     if (!blob || !("ClipboardItem" in window) || !navigator.clipboard?.write) return;
     await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+    toast.success("Copied entry image to clipboard.");
     setCopied(true);
-    window.setTimeout(() => setCopied(false), 1800);
+    window.setTimeout(() => setCopied(false), 2000);
   }
 
   return (
     <Button type="button" variant="ghost" size="icon-sm" onClick={copyImage} aria-label="Copy entry as image">
-      {copied ? <Check className="size-4" /> : <ImageIcon className="size-4" />}
+      {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
     </Button>
   );
 }

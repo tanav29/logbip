@@ -91,7 +91,7 @@ export default async function Dashboard({
             <div className="grid gap-3">
               {paths.map((path) => (
                 <Link key={path.id} href={`/p/${path.slug}`}>
-                  <Card>
+                  <Card className="transition-shadow duration-200 hover:shadow-md">
                     <CardHeader>
                       <CardTitle>{path.title}</CardTitle>
                     </CardHeader>

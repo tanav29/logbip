@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { nanoid } from "nanoid";
+import { isEntryOlderThanADay, today } from "@/lib/utils";
 
 const formValue = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
 
@@ -74,12 +75,14 @@ export async function saveEntry(form: FormData) {
   const user = await currentUser();
   if (!user) throw new Error("Unauthorized");
   const pathId = formValue(form, "pathId");
-  const date = formValue(form, "date");
+  const date = formValue(form, "date") || today();
   const content = formValue(form, "content");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !content || content.length > 5000)
     throw new Error("Invalid log entry.");
   const path = await prisma.path.findFirst({ where: { id: pathId, userId: user.id }, select: { id: true, slug: true } });
   if (!path) throw new Error("Path not found.");
+  const existing = await prisma.entry.findFirst({ where: { pathId, date }, select: { id: true, date: true } });
+  if (existing && isEntryOlderThanADay(existing.date)) throw new Error("Cannot edit logs older than a day.");
   await prisma.entry.upsert({
     where: { pathId_date: { pathId, date } },
     create: { id: nanoid(), pathId, userId: user.id, date, content, note: formValue(form, "note") || null },

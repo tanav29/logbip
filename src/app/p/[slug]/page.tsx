@@ -1,13 +1,9 @@
 import { notFound } from "next/navigation";
 import { calculateStats } from "@/lib/stats";
-import { today } from "@/lib/utils";
 import { ProgressNode } from "@/components/progress-node";
 import { PathForm } from "../../new/page";
-import { saveEntry } from "@/app/actions";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { MessageSquarePlus, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +15,7 @@ import Markdown from "react-markdown";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { AddEntryDialog } from "@/components/add-entry-dialog";
 
 export default async function PathPage({
   params,
@@ -48,7 +45,6 @@ export default async function PathPage({
 
   const logs = entries;
   const stats = calculateStats(logs.map((entry) => entry.date));
-  const latest = logs.at(-1);
 
   return (
     <main className="mx-auto w-full max-w-6xl p-5 flex gap-6">
@@ -111,57 +107,17 @@ export default async function PathPage({
         <div className="flex items-center justify-between pb-4">
           <h2 className="text-xl font-semibold">Progress logs</h2>
           {admin && (
-            <Dialog>
-              <DialogTrigger render={<Button className="gap-2" />}>
-                <MessageSquarePlus className="h-4 w-4" />
-                Add log
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Log a day</DialogTitle>
-                </DialogHeader>
-                <form action={saveEntry} className="mt-4 space-y-4">
-                  <input type="hidden" name="pathId" value={path.id} />
-                  <label className="block text-sm font-medium">
-                    Date
-                    <Input
-                      required
-                      type="date"
-                      name="date"
-                      defaultValue={
-                        latest?.date === today() ? latest.date : today()
-                      }
-                    />
-                  </label>
-                  <label className="block text-sm font-medium">
-                    What did you do?
-                    <Textarea
-                      required
-                      name="content"
-                      rows={4}
-                      placeholder="Read a chapter, shipped a feature…"
-                    />
-                  </label>
-                  <label className="block text-sm font-medium">
-                    Note
-                    <span className="ml-1 font-normal text-muted-foreground">
-                      (optional)
-                    </span>
-                    <Textarea name="note" rows={2} />
-                  </label>
-                  <Button className="w-full" type="submit">
-                    Save entry
-                  </Button>
-                </form>
-              </DialogContent>
-            </Dialog>
+            <AddEntryDialog
+              pathId={path.id}
+              existingEntries={entries}
+            />
           )}
         </div>
 
         <hr className="mb-4" />
 
         {logs.length ? (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {[...logs].reverse().map((entry) => (
               <ProgressNode
                 key={entry.id}
