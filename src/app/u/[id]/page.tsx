@@ -2,7 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { calculateStats } from "@/lib/stats";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
@@ -37,21 +37,25 @@ export default async function Dashboard({
   const stats = calculateStats(allEntries.map((entry) => entry.date));
   return (
     <>
-      <main className="relative mx-auto w-full max-w-4xl p-5">
-        <img className="select-none aspect-3/1 w-full rounded-2xl object-cover border shadow-lg" src="https://i0.wp.com/modernstoicism.com/wp-content/uploads/2025/11/1024px-Vanitas-Still_Life_Oosterwijck.jpg?resize=768%2C635" />
+      <main className="relative mx-auto w-full max-w-5xl px-5 py-8 sm:px-8 sm:py-12">
+        <div className="relative flex min-h-52 items-end overflow-hidden rounded-2xl bg-[#173b36] p-6 text-[#f6f0e5] sm:min-h-64 sm:p-8">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(231,181,107,.35),transparent_35%),linear-gradient(135deg,transparent,rgba(0,0,0,.2))]" />
+          <p className="relative max-w-sm text-2xl font-medium leading-tight tracking-tight sm:text-3xl">A record of showing up, even when no one is watching.</p>
+        </div>
 
         <div className="my-8 flex flex-wrap items-end justify-between gap-4">
           <div className="gap-2 flex items-center">
             <img
               src={user?.image ?? "/bg.png"}
-              className="w-8 h-8 rounded-full"
+              alt=""
+              className="size-9 rounded-full border border-border object-cover"
             />
-            <p className="font-semibold">{user?.name}</p>
+            <div><p className="text-xs text-muted-foreground">Learning in public</p><p className="font-semibold">{user?.name}</p></div>
           </div>
           {admin && <Button render={<Link href="/new" />}>New path</Button>}
         </div>
         <div className="mb-10">
-          <div className="grid grid-cols-3 divide-x divide-border">
+          <div className="grid grid-cols-3 rounded-xl border border-border bg-card p-5 shadow-sm">
             <Stat label="Active paths" value={paths.length} />
             <Stat
               label="Current streak"
@@ -80,9 +84,9 @@ export default async function Dashboard({
           </div>
         </div>
 
-        <section>
+        <section className="mt-12">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Your paths</h2>
+            <div><p className="eyebrow">Your workspace</p><h2 className="mt-1 text-2xl font-semibold tracking-tight">Learning paths</h2></div>
             <span className="text-sm text-muted-foreground">
               {paths.length} total
             </span>
@@ -92,15 +96,10 @@ export default async function Dashboard({
               {paths.map((path) => (
                 <Link key={path.id} href={`/p/${path.slug}`}>
                   <Card className="transition-shadow duration-200 hover:shadow-md">
-                    <CardHeader>
-                      <CardTitle>{path.title}</CardTitle>
+                    <CardHeader className="flex-row items-start justify-between gap-4">
+                      <div><CardTitle>{path.title}</CardTitle><p className="mt-2 text-sm text-muted-foreground">{path.description?.slice(0, 100) || "No description yet."}</p></div>
+                      <span className="text-xl text-accent-foreground">↗</span>
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">
-                        {path.description?.slice(0, 20) ||
-                          "No description yet."}
-                      </p>
-                    </CardContent>
                   </Card>
                 </Link>
               ))}

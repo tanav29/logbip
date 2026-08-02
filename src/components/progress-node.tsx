@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, ChevronUp, MoreHorizontal } from "lucide-react";
+import { ChevronUp, MoreHorizontal } from "lucide-react";
 import Markdown from "react-markdown";
 import type { Entry } from "@/generated/prisma/client";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -28,7 +28,20 @@ type ProgressNodeProps = {
 
 export function ProgressNode({ pathId, pathTitle, entry, admin }: ProgressNodeProps) {
   const [more, setMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
   const [editing, setEditing] = useState(false);
+  const noteRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const note = noteRef.current;
+    if (!note) return;
+
+    const checkOverflow = () => setHasMore(note.scrollHeight > 56);
+    checkOverflow();
+    const observer = new ResizeObserver(checkOverflow);
+    observer.observe(note);
+    return () => observer.disconnect();
+  }, [entry.note]);
   const [saving, setSaving] = useState(false);
   const router = useRouter();
 
@@ -70,9 +83,8 @@ export function ProgressNode({ pathId, pathTitle, entry, admin }: ProgressNodePr
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex gap-3 items-center px-1 py-1">
-        <CheckCircle2 className="fill-accent size-4" />
-        <span className="block text-xs font-medium text-muted-foreground">
+      <div className="flex gap-3 items-center py-1">
+        <span className="block text-md font-medium text-muted-foreground underline">
           {new Date(entry.date).toLocaleDateString()}
         </span>
         <span className="min-w-0 flex-1">
@@ -97,16 +109,29 @@ export function ProgressNode({ pathId, pathTitle, entry, admin }: ProgressNodePr
       </div>
       {entry.note && (
         <div className="typeset typeset-docs text-sm pr-1">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <p className="italic text-xs">Note:</p>
-            <button
-              className={cn("hover:text-primary transition-all duration-200", more ? "rotate-180" : "rotate-0")}
-              onClick={() => setMore(!more)}
-            >
-              <ChevronUp className="h-4 w-4" />
-            </button>
+          <div
+            ref={noteRef}
+            className={cn(
+              "relative overflow-hidden  text-foreground/85 transition-[max-height] duration-500 ease-in-out motion-reduce:transition-none",
+              more ? "max-h-[1000px]" : "max-h-8",
+            )}
+          >
+            <Markdown>{entry.note}</Markdown>
+            {!more && hasMore && (
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-background to-transparent" />
+            )}
           </div>
-          <div className="px-2">{more && <Markdown>{entry.note}</Markdown>}</div>
+          {hasMore && (
+            <button
+              type="button"
+              aria-expanded={more}
+              onClick={() => setMore(!more)}
+              className="mt-1 flex items-center gap-1  text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+            >
+              {more ? "Show less" : "Show more"}
+              <ChevronUp className={cn("size-3 transition-transform duration-300", more ? "rotate-0" : "rotate-180")} />
+            </button>
+          )}
         </div>
       )}
 

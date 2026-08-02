@@ -9,27 +9,27 @@ export function SiteHeader() {
   const { data: session } = authClient.useSession();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/70 bg-background/95 backdrop-blur-xl">
-      <div className="mx-auto flex min-h-14 w-full max-w-6xl items-center justify-between gap-4 px-5">
+    <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-xl">
+      <div className="mx-auto flex min-h-16 w-full max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
         <Link
           href="/"
           className="group flex items-center gap-2 text-lg font-semibold tracking-tight">
-          <span className="flex size-6 items-center justify-center rounded-[5px] bg-foreground text-xs text-background">
-            L
+          <span className="flex size-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+            ↗
           </span>
-          LogBip
+          <span>Log<span className="text-accent-foreground">Bip</span></span>
         </Link>
         <nav className="flex items-center gap-3 text-sm">
           {/* {isPending && !session && <Loader className="animate-spin w-4 h-4" />} */}
           {session ? (
             <>
               <Link
-                className="hidden sm:inline-flex hover:text-muted-foreground"
+                className="hidden rounded-md px-2 py-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:inline-flex"
                 href={`/u/${session.user.id}`}>
                 Dashboard
               </Link>
               <Link
-                className="hidden sm:inline-flex hover:text-muted-foreground"
+                className="hidden rounded-md px-2 py-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:inline-flex"
                 href="/settings">
                 Settings
               </Link>
@@ -42,7 +42,7 @@ export function SiteHeader() {
                 });
               }}
               variant="outline">
-              Continue with Google
+              Sign in with Google
             </Button>
           )}
         </nav>

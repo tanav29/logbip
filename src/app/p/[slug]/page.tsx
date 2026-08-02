@@ -47,20 +47,21 @@ export default async function PathPage({
   const stats = calculateStats(logs.map((entry) => entry.date));
 
   return (
-    <main className="mx-auto w-full max-w-6xl p-5 flex gap-6">
-      <main className="max-w-[35vw] flex flex-col">
+    <main className="mx-auto grid w-full h-full max-w-6xl gap-10 px-5 py-8 sm:px-8 sm:py-12 lg:grid-cols-[minmax(0,340px)_1fr] lg:gap-14">
+      <section className="flex flex-col">
         {
           path.banner ?
           <img
             src={path.banner}
-            className="w-full object-cover aspect-4/3 rounded-xl bg-accent-foreground"
+            alt=""
+            className="w-full object-cover aspect-[5/3] rounded-2xl bg-primary"
           /> : (
-          <div className="w-full aspect-4/3 rounded-xl bg-accent-foreground flex items-center justify-center">
-            no banner
+          <div className="w-full aspect-[5/3] rounded-2xl bg-primary p-6 text-2xl font-medium leading-tight text-primary-foreground flex items-end">
+            A path in progress.
           </div>
         )
         }
-        <div className="mt-6 flex gap-3">
+        <div className="mt-6 grid grid-cols-3 divide-x divide-border rounded-xl border border-border bg-card p-4">
           <Stat label="Current streak" value={stats.current} />
           <Stat label="Longest streak" value={stats.longest} />
           <Stat label="Days logged" value={stats.total} />
@@ -68,7 +69,7 @@ export default async function PathPage({
 
         <div className="mt-6 flex flex-col space-y-4">
           <div className="flex items-start justify-between gap-1">
-            <h1 className="text-3xl font-semibold tracking-tight flex-1 truncate">
+            <h1 className="flex-1 text-3xl font-semibold tracking-tight">
               {path.title}
             </h1>
 
@@ -90,21 +91,21 @@ export default async function PathPage({
 
           <div className="gap-2 flex items-center">
             <img
-              src={path.user?.image ?? undefined}
-              className="w-8 h-8 rounded-full"
+              src={path.user?.image ?? path.user.avatar ?? "/bg.png"}
+              alt=""
+              className="size-8 rounded-full object-cover"
             />
             <p>{path.user?.name}</p>
           </div>
 
-          <div className="typeset typeset-docs text-muted-foreground text-sm overflow-auto">
-            <p className="italic text-xs">Description:</p>
+          <div className="typeset typeset-docs text-muted-foreground text-sm overflow-auto border rounded-md p-2">
             <Markdown>{path.description}</Markdown>
           </div>
         </div>
-      </main>
+      </section>
 
-      <div className="max-w-[65vw] flex flex-col w-full">
-        <div className="flex items-center justify-between pb-4">
+      <section className="flex w-full flex-col h-full overflow-y-auto scrollbar-none">
+        <div className="flex items-center justify-between gap-4 border-b border-border pb-4">
           <h2 className="text-xl font-semibold">Progress logs</h2>
           {admin && (
             <AddEntryDialog
@@ -114,7 +115,7 @@ export default async function PathPage({
           )}
         </div>
 
-        <hr className="mb-4" />
+        <div className="mb-5" />
 
         {logs.length ? (
           <div className="space-y-3">
@@ -133,7 +134,7 @@ export default async function PathPage({
             No entries yet. Log what you learned today.
           </div>
         )}
-      </div>
+      </section>
     </main>
   );
 }
